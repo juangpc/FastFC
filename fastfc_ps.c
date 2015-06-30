@@ -50,16 +50,35 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     const int n_threads=omp_get_num_procs();
     const int last_sample=n_samples-init_sample;
     const int n_samples_eff=n_samples-2*init_sample;
-            
+    const int mode=(int)mxGetScalar(prhs[2]);
+                
     x_d=(double*)mxGetPr(prhs[0]);
     
     x_f=(float*)mxMalloc(n_elements*sizeof(float));
     h=(fftwf_complex*)fftwf_malloc(n_elements*sizeof(fftwf_complex));
     a=(fftwf_complex*)fftwf_malloc(n_elements*sizeof(fftwf_complex));
     
+    if (mode==3)
+    {
     p_r2c=fftwf_plan_dft_r2c_1d(n_samples,x_f,h,FFTW_EXHAUSTIVE);
     p_c2c=fftwf_plan_dft_1d(n_samples,h,a,FFTW_BACKWARD,FFTW_EXHAUSTIVE);
-    
+    } 
+    else if (mode==3)
+    {
+    p_r2c=fftwf_plan_dft_r2c_1d(n_samples,x_f,h,FFTW_PATIENT);
+    p_c2c=fftwf_plan_dft_1d(n_samples,h,a,FFTW_BACKWARD,FFTW_PATIENT);
+    }
+    else if (mode==3)
+    {
+    p_r2c=fftwf_plan_dft_r2c_1d(n_samples,x_f,h,FFTW_MEASURE);
+    p_c2c=fftwf_plan_dft_1d(n_samples,h,a,FFTW_BACKWARD,FFTW_MEASURE);
+    }
+    else
+    {
+    p_r2c=fftwf_plan_dft_r2c_1d(n_samples,x_f,h,FFTW_ESTIMATE);
+    p_c2c=fftwf_plan_dft_1d(n_samples,h,a,FFTW_BACKWARD,FFTW_ESTIMATE);
+    } 
+        
     omp_set_num_threads(n_threads);
     #pragma omp parallel
     {
