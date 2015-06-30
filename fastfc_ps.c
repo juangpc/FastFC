@@ -32,7 +32,7 @@
 
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 {
-    int i,f_i,sample_i,sensor_i,first_samp_sensor_i,sensor_j,n_threads;
+    int i,f_i,sample_i,sensor_i,first_samp_sensor_i,sensor_j;
     float *x_f,*x_f_i,*x_f_j,*adj_plv,*adj_pli,*adj_wpli,*pval_plv,plv_i,
             sum_cos,sum_sin,sum_sin_sign,phi,sin_phi,sum_abs_sin;
     double *x_d,*out_plv,*out_pli,*out_wpli,*out_pval;
@@ -46,7 +46,8 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     const int n_f=n_samples/2+((is_even)? 0:1);
     const float factor_n=(float)1.0/n_samples;
     const int n_indexes=n_sensors*n_sensors;
-    const int init_sample=(int)mxGetScalar(prhs[2]);
+    const int init_sample=(int)mxGetScalar(prhs[1]);
+    const int n_threads=omp_get_num_procs();
     const int last_sample=n_samples-init_sample;
     const int n_samples_eff=n_samples-2*init_sample;
             
@@ -59,7 +60,6 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     p_r2c=fftwf_plan_dft_r2c_1d(n_samples,x_f,h,FFTW_EXHAUSTIVE);
     p_c2c=fftwf_plan_dft_1d(n_samples,h,a,FFTW_BACKWARD,FFTW_EXHAUSTIVE);
     
-    n_threads=(int)mxGetScalar(prhs[1]);
     omp_set_num_threads(n_threads);
     #pragma omp parallel
     {
@@ -149,9 +149,6 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
                 adj_wpli[sensor_i+(n_sensors*sensor_j)]=adj_wpli[sensor_j+(n_sensors*sensor_i)];
                 pval_plv[sensor_i+(n_sensors*sensor_j)]=pval_plv[sensor_j+(n_sensors*sensor_i)];
                 
-                mexPrintf(" sensor_i = %03i \t-\t sensor_j = %03i\n",sensor_i,sensor_j);
-				mexEvalString("drawnow;");
-
             }
         }
     }
@@ -197,5 +194,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     mxFree(adj_pli);
     mxFree(adj_wpli);
 }
+    
+    
     
     
