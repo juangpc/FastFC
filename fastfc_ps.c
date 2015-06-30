@@ -47,7 +47,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     const float factor_n=(float)1.0/n_samples;
     const int n_indexes=n_sensors*n_sensors;
     const int init_sample=(int)mxGetScalar(prhs[1]);
-    const int n_threads=omp_get_num_procs();
+    const int n_threads=1;//omp_get_num_procs();
     const int last_sample=n_samples-init_sample;
     const int n_samples_eff=n_samples-2*init_sample;
     const int mode=(int)mxGetScalar(prhs[2]);
@@ -213,7 +213,6 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     mxFree(adj_pli);
     mxFree(adj_wpli);
 }
-    
     
     
     
