@@ -25,152 +25,156 @@
 // 
 //    J. Garcia-Prieto, E. Pereda
 //
-
 #include <mex.h>
 #include <fftw3.h>
 #include <math.h>
 
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 {
-    char *wisdom_str;
-    int n_samples,n_sensors,n_elements,wisdom_str_length,n_f,ii,i,
-            sensor_i,sensor_j,n_indexes;
-    float factor_n,*x_f,*x_f_i,*x_f_j,*adj_plv,*adj_pli,*adj_wpli,
+    
+    int i,f_i,sample_i,sensor_i,first_samp_sensor_i,sensor_j,n_threads;
+    float *x_f,*x_f_i,*x_f_j,*adj_plv,*adj_pli,*adj_wpli,
             sum_cos,sum_sin,sum_sin_sign,phi,sin_phi,sum_abs_sin;
     double *x_d,*out_plv,*out_pli,*out_wpli;
-    fftwf_complex *a,*h,*h_i;
+    fftwf_complex *a,*h;
     fftwf_plan p_r2c, p_c2c;
     
+    const int n_samples=(int)mxGetM(prhs[0]);
+    const int n_sensors=(int)mxGetN(prhs[0]);
+    const int n_elements=n_samples*n_sensors;
+    const int is_even=(n_samples%2)? 0:1;
+    const int n_f=n_samples/2+(is_even)? 0:1;
+    const float factor_n=(float)1.0/n_samples;
+    const int n_indexes=n_sensors*n_sensors;
+
     x_d=(double*)mxGetPr(prhs[0]);
-    n_samples=(int)mxGetM(prhs[0]);
-    n_sensors=(int)mxGetN(prhs[0]);
-    n_elements=n_samples*n_sensors;
-    factor_n=(float)1.0/n_samples;
-
+    
     x_f=(float*)mxMalloc(n_elements*sizeof(float));
-    i=n_elements;
-    while(i--)
-        x_f[i]=(float)x_d[i];
+    h=(fftwf_complex*)fftwf_malloc(n_elements*sizeof(fftwf_complex));
+    a=(fftwf_complex*)fftwf_malloc(n_elements*sizeof(fftwf_complex));
     
-    wisdom_str_length=(int)mxGetN(prhs[1])*sizeof(mxChar)+1;
-    wisdom_str=(char*)mxMalloc(wisdom_str_length);
-    mxGetString(prhs[1], wisdom_str, (mwSize)wisdom_str_length);
-    fftwf_import_wisdom_from_string(wisdom_str);
-
-    h=(fftwf_complex*)fftwf_malloc(n_samples*n_sensors*sizeof(fftwf_complex));
-    a=(fftwf_complex*)fftwf_malloc(n_samples*n_sensors*sizeof(fftwf_complex));
+    p_r2c=fftwf_plan_dft_r2c_1d(n_samples,x_f,h,FFTW_EXHAUSTIVE);
+    p_c2c=fftwf_plan_dft_1d(n_samples,h,a,FFTW_BACKWARD,FFTW_EXHAUSTIVE);
     
-    p_r2c=fftwf_plan_many_dft_r2c(1,&n_samples,n_sensors,
-            x_f,&n_samples,1,n_samples,
-            h,&n_samples,1,n_samples,
-            FFTW_ESTIMATE);
-    p_c2c=fftwf_plan_many_dft(1,&n_samples,n_sensors,
-            h,&n_samples,1,n_samples,
-            a,&n_samples,1,n_samples,
-            FFTW_BACKWARD,FFTW_ESTIMATE);
-    
-    fftwf_execute(p_r2c);
-
-    for(sensor_i=0;sensor_i<n_sensors;++sensor_i)
-    {
-        h_i=h+(sensor_i*n_samples);
-        if(n_samples%2)
+//     omp_set_num_threads(n_threads);
+//     #pragma omp parallel
+//     {
+//         #pragma omp parallel for private(sensor_i,sample_i,first_samp_sensor_i,f_i)
+        for(sensor_i=0;sensor_i<n_sensors;++sensor_i)
         {
-            n_f=n_samples/2+1;
-            for(ii=1;ii<n_f;++ii)
+            first_samp_sensor_i=sensor_i*n_samples;
+            for(sample_i=0;sample_i<n_samples;++sample_i)
+                x_f[sample_i+first_samp_sensor_i]=(float)x_d[sample_i+first_samp_sensor_i];
+            
+            fftwf_execute_dft_r2c(p_r2c,&x_f[first_samp_sensor_i],&h[first_samp_sensor_i]);
+            
+            for(f_i=1;f_i<n_f;++f_i)
             {
-                h_i[ii][0]*=2;
-                h_i[ii][1]*=2;
+                h[f_i+first_samp_sensor_i][0]*=2;
+                h[f_i+first_samp_sensor_i][1]*=2;
             }
-        }else{
-            n_f=n_samples/2;
-            for(ii=1;ii<n_f;++ii)
+            
+            if(is_even)
+                ++f_i;
+            
+            for(;f_i<n_samples;++f_i)
             {
-                h_i[ii][0]*=2;
-                h_i[ii][1]*=2;
+                h[f_i+first_samp_sensor_i][0]=0;
+                h[f_i+first_samp_sensor_i][1]=0;
             }
-            ++ii;
+            
+            fftwf_execute_dft(p_c2c,&h[first_samp_sensor_i],&a[first_samp_sensor_i]);
+            
+            for(sample_i=0;sample_i<n_samples;++sample_i)
+                x_f[sample_i+first_samp_sensor_i]=atan2f(
+                        factor_n*a[sample_i+first_samp_sensor_i][1],
+                        factor_n*a[sample_i+first_samp_sensor_i][0]);
         }
-        for(;ii<n_samples;++ii)
-        {
-            h_i[ii][0]=0;
-            h_i[ii][1]=0;
-        }
-    }
-    
-    fftwf_execute(p_c2c);
-    
-    mxFree(wisdom_str);
+//     }
     fftwf_free(h);
+    fftwf_free(a);
     fftwf_destroy_plan(p_r2c);
     fftwf_destroy_plan(p_c2c);
-
-    for(i=0;i<n_elements;++i)
-        x_f[i]=atan2f(factor_n*a[i][1],factor_n*a[i][0]);
+    //hasta aqui la phase esta en x_f
     
-    fftwf_free(a);
-    
-    adj_plv =(float*)mxMalloc(n_sensors*n_sensors*sizeof(float));
-    adj_pli =(float*)mxMalloc(n_sensors*n_sensors*sizeof(float));
-    adj_wpli=(float*)mxMalloc(n_sensors*n_sensors*sizeof(float));
+    adj_plv =(float*)mxMalloc(n_elements*sizeof(float));
+    adj_pli =(float*)mxMalloc(n_elements*sizeof(float));
+    adj_wpli=(float*)mxMalloc(n_elements*sizeof(float));
     
     for(sensor_i=0;sensor_i<n_sensors;++sensor_i)
     {
         adj_plv[sensor_i+(n_sensors*sensor_i)]=1.0;
         adj_pli[sensor_i+(n_sensors*sensor_i)]=1.0;
         adj_wpli[sensor_i+(n_sensors*sensor_i)]=1.0;
-
-        for(sensor_j=sensor_i+1;sensor_j<n_sensors;++sensor_j)
-        {
-            x_f_i=x_f+(sensor_i*n_samples);
-            x_f_j=x_f+(sensor_j*n_samples);
-            sum_cos=0;
-            sum_sin=0;
-            sum_sin_sign=0;
-            sum_abs_sin=0;
-            
-            for(i=0;i<n_samples;++i)
+        
+//         #pragma omp parallel
+//         {
+//             #pragma omp parallel for private(sensor_j,sum_cos,sum_sin,sum_sin_sign,sum_abs_sin) /*reduction(+:sum_cos,sum_sin,sum_sin_sign,sum_abs_sin)*/
+            for(sensor_j=sensor_i+1;sensor_j<n_sensors;++sensor_j)
             {
-               phi=x_f_i[i]-x_f_j[i];
-               sum_cos+=cosf(phi);
-               sin_phi=sinf(phi);
-               sum_sin+=sin_phi;
-               sum_sin_sign+=(float)(sin_phi>0.0)-(sin_phi<0.0);
-               sum_abs_sin+=fabs(sin_phi);
+                x_f_i=x_f+(sensor_i*n_samples);
+                x_f_j=x_f+(sensor_j*n_samples);
+                sum_cos=0;
+                sum_sin=0;
+                sum_sin_sign=0;
+                sum_abs_sin=0;
+                
+                for(i=0;i<n_samples;++i)
+                {
+                    phi=x_f_i[i]-x_f_j[i];
+                    sum_cos+=cosf(phi);
+                    sin_phi=sinf(phi);
+                    sum_sin+=sin_phi;
+                    sum_sin_sign+=(float)(sin_phi>0.0)-(sin_phi<0.0);
+                    sum_abs_sin+=fabsf(sin_phi);
+                }
+                sum_cos/=n_samples;
+                sum_sin/=n_samples;
+                
+                adj_plv[sensor_j+(n_sensors*sensor_i)]=
+                        sqrtf(sum_cos*sum_cos+sum_sin*sum_sin);
+                adj_pli[sensor_j+(n_sensors*sensor_i)]=fabsf(sum_sin_sign/n_samples);
+                adj_wpli[sensor_j+(n_sensors*sensor_i)]=fabsf(sum_sin)/sum_abs_sin*n_samples;
+                
+                adj_plv[sensor_i+(n_sensors*sensor_j)]=adj_plv[sensor_j+(n_sensors*sensor_i)];
+                adj_pli[sensor_i+(n_sensors*sensor_j)]=adj_pli[sensor_j+(n_sensors*sensor_i)];
+                adj_wpli[sensor_i+(n_sensors*sensor_j)]=adj_wpli[sensor_j+(n_sensors*sensor_i)];
             }
-            sum_cos/=n_samples;
-            sum_sin/=n_samples;
-                        
-            adj_plv[sensor_j+(n_sensors*sensor_i)]=
-                    sqrt(sum_cos*sum_cos+sum_sin*sum_sin);
-            adj_pli[sensor_j+(n_sensors*sensor_i)]=fabs(sum_sin_sign/n_samples);
-            adj_wpli[sensor_j+(n_sensors*sensor_i)]=fabs(sum_sin)/sum_abs_sin*n_samples;
-            
-            adj_plv[sensor_i+(n_sensors*sensor_j)]=adj_plv[sensor_j+(n_sensors*sensor_i)];
-            adj_pli[sensor_i+(n_sensors*sensor_j)]=adj_pli[sensor_j+(n_sensors*sensor_i)];
-            adj_wpli[sensor_i+(n_sensors*sensor_j)]=adj_wpli[sensor_j+(n_sensors*sensor_i)];
-        }
+//         }
     }
-    
+
     mxFree(x_f);
+    
     plhs[0]=mxCreateDoubleMatrix(n_sensors,n_sensors,mxREAL);
     plhs[1]=mxCreateDoubleMatrix(n_sensors,n_sensors,mxREAL);
     plhs[2]=mxCreateDoubleMatrix(n_sensors,n_sensors,mxREAL);
+    
+    omp_set_num_threads(3);
+    #pragma omp sections private(i) 
+    {
+                    mexPrintf("number of threads=%d\n",omp_get_num_threads());
 
-    n_indexes=n_sensors*n_sensors;
+        #pragma omp section
+        {
 
-    out_plv=(double*)mxGetPr(plhs[0]);
-    for(i=0;i<n_indexes;++i)
-        out_plv[i]=(double)adj_plv[i];
-
-    out_pli=(double*)mxGetPr(plhs[1]);
-    for(i=0;i<n_indexes;++i)
-        out_pli[i]=(double)adj_pli[i];
-
-    out_wpli=(double*)mxGetPr(plhs[2]);
-    for(i=0;i<n_indexes;++i)
-        out_wpli[i]=(double)adj_wpli[i];
-
+            out_plv=(double*)mxGetPr(plhs[0]);
+            for(i=0;i<n_indexes;++i)
+                out_plv[i]=(double)adj_plv[i];
+        }
+        #pragma omp section
+        {
+            out_pli=(double*)mxGetPr(plhs[1]);
+            for(i=0;i<n_indexes;++i)
+                out_pli[i]=(double)adj_pli[i];
+        }
+        #pragma omp section 
+        {
+            out_wpli=(double*)mxGetPr(plhs[2]);
+            for(i=0;i<n_indexes;++i)
+                out_wpli[i]=(double)adj_wpli[i];
+        }
+    }
+    
     mxFree(adj_plv);
     mxFree(adj_pli);
     mxFree(adj_wpli);
