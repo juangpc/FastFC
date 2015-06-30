@@ -28,14 +28,15 @@
 #include <mex.h>
 #include <fftw3.h>
 #include <math.h>
+#include <omp.h>
 
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 {
     
     int i,f_i,sample_i,sensor_i,first_samp_sensor_i,sensor_j,n_threads;
-    float *x_f,*x_f_i,*x_f_j,*adj_plv,*adj_pli,*adj_wpli,
+    float *x_f,*x_f_i,*x_f_j,*adj_plv,*adj_pli,*adj_wpli,*pval_plv,plv_i,
             sum_cos,sum_sin,sum_sin_sign,phi,sin_phi,sum_abs_sin;
-    double *x_d,*out_plv,*out_pli,*out_wpli;
+    double *x_d,*out_plv,*out_pli,*out_wpli,*out_pval;
     fftwf_complex *a,*h;
     fftwf_plan p_r2c, p_c2c;
     
@@ -99,18 +100,20 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     fftwf_destroy_plan(p_c2c);
     
     adj_plv =(float*)mxMalloc(n_elements*sizeof(float));
+    pval_plv=(float*)mxMalloc(n_elements*sizeof(float));
     adj_pli =(float*)mxMalloc(n_elements*sizeof(float));
     adj_wpli=(float*)mxMalloc(n_elements*sizeof(float));
-    
+        
     for(sensor_i=0;sensor_i<n_sensors;++sensor_i)
     {
         adj_plv[sensor_i+(n_sensors*sensor_i)]=1.0;
         adj_pli[sensor_i+(n_sensors*sensor_i)]=1.0;
         adj_wpli[sensor_i+(n_sensors*sensor_i)]=1.0;
+        pval_plv[sensor_i+(n_sensors*sensor_i)]=0.0;
         
         #pragma omp parallel
         {
-            #pragma omp for private(sensor_j,i,phi,sin_phi,x_f_i,x_f_j) reduction(+:sum_cos,sum_sin,sum_sin_sign,sum_abs_sin) //private(sensor_j,i,phi,sin_phi,x_f_i,x_f_j,sum_cos,sum_sin,sum_sin_sign,sum_abs_sin)
+            #pragma omp for private(sensor_j,i,phi,sin_phi,x_f_i,x_f_j,plv_i) reduction(+:sum_cos,sum_sin,sum_sin_sign,sum_abs_sin) //private(sensor_j,i,phi,sin_phi,x_f_i,x_f_j,sum_cos,sum_sin,sum_sin_sign,sum_abs_sin)
             for(sensor_j=sensor_i+1;sensor_j<n_sensors;++sensor_j)
             {
                 x_f_i=x_f+(sensor_i*n_samples);
@@ -132,14 +135,17 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
                 sum_cos/=n_samples;
                 sum_sin/=n_samples;
                 
-                adj_plv[sensor_j+(n_sensors*sensor_i)]=
-                        sqrtf(sum_cos*sum_cos+sum_sin*sum_sin);
+                plv_i=sqrtf(sum_cos*sum_cos+sum_sin*sum_sin);
                 adj_pli[sensor_j+(n_sensors*sensor_i)]=fabsf(sum_sin_sign/n_samples);
                 adj_wpli[sensor_j+(n_sensors*sensor_i)]=fabsf(sum_sin)/sum_abs_sin*n_samples;
+                adj_plv[sensor_j+(n_sensors*sensor_i)]=plv_i;
+                pval_plv[sensor_j+(n_sensors*sensor_i)]=
+ expf(sqrtf((float)(1+4*n_samples)+4.0*(float)n_samples*(float)n_samples*(1.0-plv_i*plv_i))-(float)(1+2*n_samples));
                 
-                adj_plv[sensor_i+(n_sensors*sensor_j)]=adj_plv[sensor_j+(n_sensors*sensor_i)];
+                adj_plv[sensor_i+(n_sensors*sensor_j)]=plv_i;
                 adj_pli[sensor_i+(n_sensors*sensor_j)]=adj_pli[sensor_j+(n_sensors*sensor_i)];
                 adj_wpli[sensor_i+(n_sensors*sensor_j)]=adj_wpli[sensor_j+(n_sensors*sensor_i)];
+                pval_plv[sensor_i+(n_sensors*sensor_j)]=pval_plv[sensor_j+(n_sensors*sensor_i)];
             }
         }
     }
@@ -149,26 +155,33 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     plhs[0]=mxCreateDoubleMatrix(n_sensors,n_sensors,mxREAL);
     plhs[1]=mxCreateDoubleMatrix(n_sensors,n_sensors,mxREAL);
     plhs[2]=mxCreateDoubleMatrix(n_sensors,n_sensors,mxREAL);
+    plhs[3]=mxCreateDoubleMatrix(n_sensors,n_sensors,mxREAL);
     
     omp_set_num_threads(3);
     #pragma omp parallel sections private(i) 
     {
         #pragma omp section
         {
-//             mexPrintf("number of threads=%d\n",omp_get_num_threads());
             out_plv=(double*)mxGetPr(plhs[0]);
             for(i=0;i<n_indexes;++i)
                 out_plv[i]=(double)adj_plv[i];
         }
+        #pragma omp section 
+        {
+            out_pval=(double*)mxGetPr(plhs[1]);
+            for(i=0;i<n_indexes;++i)
+                out_pval[i]=(double)pval_plv[i];
+        }
+
         #pragma omp section
         {
-            out_pli=(double*)mxGetPr(plhs[1]);
+            out_pli=(double*)mxGetPr(plhs[2]);
             for(i=0;i<n_indexes;++i)
                 out_pli[i]=(double)adj_pli[i]; 
         }
         #pragma omp section 
         {
-            out_wpli=(double*)mxGetPr(plhs[2]);
+            out_wpli=(double*)mxGetPr(plhs[3]);
             for(i=0;i<n_indexes;++i)
                 out_wpli[i]=(double)adj_wpli[i];
         }
