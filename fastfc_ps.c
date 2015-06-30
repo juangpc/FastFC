@@ -101,10 +101,10 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     fftwf_destroy_plan(p_r2c);
     fftwf_destroy_plan(p_c2c);
     
-    adj_plv =(float*)mxMalloc(n_elements*sizeof(float));
-    pval_plv=(float*)mxMalloc(n_elements*sizeof(float));
-    adj_pli =(float*)mxMalloc(n_elements*sizeof(float));
-    adj_wpli=(float*)mxMalloc(n_elements*sizeof(float));
+    adj_plv =(float*)mxMalloc(n_indexes*sizeof(float));
+    pval_plv=(float*)mxMalloc(n_indexes*sizeof(float));
+    adj_pli =(float*)mxMalloc(n_indexes*sizeof(float));
+    adj_wpli=(float*)mxMalloc(n_indexes*sizeof(float));
         
     for(sensor_i=0;sensor_i<n_sensors;++sensor_i)
     {
@@ -148,6 +148,10 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
                 adj_pli[sensor_i+(n_sensors*sensor_j)]=adj_pli[sensor_j+(n_sensors*sensor_i)];
                 adj_wpli[sensor_i+(n_sensors*sensor_j)]=adj_wpli[sensor_j+(n_sensors*sensor_i)];
                 pval_plv[sensor_i+(n_sensors*sensor_j)]=pval_plv[sensor_j+(n_sensors*sensor_i)];
+                
+                mexPrintf(" sensor_i = %03i \t-\t sensor_j = %03i\n",sensor_i,sensor_j);
+				mexEvalString("drawnow;");
+
             }
         }
     }
@@ -193,3 +197,5 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     mxFree(adj_pli);
     mxFree(adj_wpli);
 }
+    
+    
