@@ -32,7 +32,6 @@
 
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 {
-    
     int i,f_i,sample_i,sensor_i,first_samp_sensor_i,sensor_j,n_threads;
     float *x_f,*x_f_i,*x_f_j,*adj_plv,*adj_pli,*adj_wpli,*pval_plv,plv_i,
             sum_cos,sum_sin,sum_sin_sign,phi,sin_phi,sum_abs_sin;
@@ -47,7 +46,10 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     const int n_f=n_samples/2+((is_even)? 0:1);
     const float factor_n=(float)1.0/n_samples;
     const int n_indexes=n_sensors*n_sensors;
-
+    const int init_sample=(int)mxGetScalar(prhs[2]);
+    const int last_sample=n_samples-init_sample;
+    const int n_samples_eff=n_samples-2*init_sample;
+            
     x_d=(double*)mxGetPr(prhs[0]);
     
     x_f=(float*)mxMalloc(n_elements*sizeof(float));
@@ -123,7 +125,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
                 sum_sin_sign=0;
                 sum_abs_sin=0;
                 
-                for(i=0;i<n_samples;++i)
+                for(i=init_sample;i<last_sample;++i)
                 {
                     phi=x_f_i[i]-x_f_j[i];
                     sum_cos+=cosf(phi);
@@ -132,15 +134,15 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
                     sum_sin_sign+=(float)(sin_phi>0.0)-(sin_phi<0.0);
                     sum_abs_sin+=fabsf(sin_phi);
                 }
-                sum_cos/=n_samples;
-                sum_sin/=n_samples;
+                sum_cos/=n_samples_eff;
+                sum_sin/=n_samples_eff;
                 
                 plv_i=sqrtf(sum_cos*sum_cos+sum_sin*sum_sin);
-                adj_pli[sensor_j+(n_sensors*sensor_i)]=fabsf(sum_sin_sign/n_samples);
-                adj_wpli[sensor_j+(n_sensors*sensor_i)]=fabsf(sum_sin)/sum_abs_sin*n_samples;
+                adj_pli[sensor_j+(n_sensors*sensor_i)]=fabsf(sum_sin_sign/n_samples_eff);
+                adj_wpli[sensor_j+(n_sensors*sensor_i)]=(fabsf(sum_sin)*n_samples_eff)/sum_abs_sin;
                 adj_plv[sensor_j+(n_sensors*sensor_i)]=plv_i;
                 pval_plv[sensor_j+(n_sensors*sensor_i)]=
- expf(sqrtf((float)(1+4*n_samples)+4.0*(float)n_samples*(float)n_samples*(1.0-plv_i*plv_i))-(float)(1+2*n_samples));
+ expf(sqrtf((float)(1+4*n_samples_eff)+4.0*(float)n_samples_eff*(float)n_samples_eff*(1.0-plv_i*plv_i))-(float)(1+2*n_samples_eff));
                 
                 adj_plv[sensor_i+(n_sensors*sensor_j)]=plv_i;
                 adj_pli[sensor_i+(n_sensors*sensor_j)]=adj_pli[sensor_j+(n_sensors*sensor_i)];
@@ -157,7 +159,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     plhs[2]=mxCreateDoubleMatrix(n_sensors,n_sensors,mxREAL);
     plhs[3]=mxCreateDoubleMatrix(n_sensors,n_sensors,mxREAL);
     
-    omp_set_num_threads(3);
+    
     #pragma omp parallel sections private(i) 
     {
         #pragma omp section
