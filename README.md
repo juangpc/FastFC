@@ -3,4 +3,6 @@ Fast Functional Connectivity Toolbox. This toolbox implements efficient C comput
 #
 - Phase Synchrony measures.
 - Zero-phase distorsion FIR filtering. 
+- Mutual Information. (MILCA implementation)
+- Generalized Syncrhonization measures.
 
