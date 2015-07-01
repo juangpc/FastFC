@@ -32,24 +32,26 @@
 
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 {
-    int i,f_i,sample_i,sensor_i,first_samp_sensor_i,sensor_j;
+    int sensor_i,sensor_j;
+    mwSize sample_i,first_samp_sensor_i,f_i;
+    mwIndex i;
     float *x_f,*x_f_i,*x_f_j,*adj_plv,*adj_pli,*adj_wpli,*pval_plv,plv_i,
             sum_cos,sum_sin,sum_sin_sign,phi,sin_phi,sum_abs_sin;
     double *x_d,*out_plv,*out_pli,*out_wpli,*out_pval;
     fftwf_complex *a,*h;
     fftwf_plan p_r2c, p_c2c;
     
-    const int n_samples=(int)mxGetM(prhs[0]);
+    const mwSize n_samples=(mwSize)mxGetM(prhs[0]);
     const int n_sensors=(int)mxGetN(prhs[0]);
-    const int n_elements=n_samples*n_sensors;
+    const mwSize n_elements=n_samples*(mwSize)n_sensors;
     const int is_even=(n_samples%2)? 0:1;
-    const int n_f=n_samples/2+((is_even)? 0:1);
+    const mwSize n_f=n_samples/2+((is_even)? 0:1);
     const float factor_n=(float)1.0/n_samples;
-    const int n_indexes=n_sensors*n_sensors;
-    const int init_sample=(int)mxGetScalar(prhs[1]);
-    const int n_threads=1;//omp_get_num_procs();
-    const int last_sample=n_samples-init_sample;
-    const int n_samples_eff=n_samples-2*init_sample;
+    const mwSize n_indexes=n_sensors*n_sensors;
+    const mwSize init_sample=(int)mxGetScalar(prhs[1]);
+    const int n_threads=omp_get_num_procs();
+    const mwSize last_sample=n_samples-init_sample;
+    const mwSize n_samples_eff=n_samples-2*init_sample;
     const int mode=(int)mxGetScalar(prhs[2]);
                 
     x_d=(double*)mxGetPr(prhs[0]);
