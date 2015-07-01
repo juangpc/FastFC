@@ -43,13 +43,13 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     const int n_sensors=(int)mxGetN(prhs[1]);
     const int mode=(int)mxGetScalar(prhs[2]);
     const int n_threads=(int)mxGetScalar(prhs[3]);
-    
     const mwSize l_p=n_samples+2*(l_b-1);
+    const float n_factor=(float)1./l_p;
 
     b_d=(double*)mxGetPr(prhs[0]);    
     x_d=(double*)mxGetPr(prhs[1]);
     
-    b=(float*)fftwf_malloc(l_p*sizeof(float));
+    b=(float*)mxMalloc(l_p*sizeof(float));
     x=(float**)mxMalloc(n_threads*sizeof(float*));
     fft_x=(fftwf_complex**)mxMalloc(n_threads*sizeof(fftwf_complex*));
     fft_b=(fftwf_complex*)fftwf_malloc(l_p*sizeof(fftwf_complex));
@@ -59,7 +59,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 
     for(thread_i=0;thread_i<n_threads;thread_i++)
     {
-        x[thread_i]=(float*)fftwf_malloc(l_p*sizeof(float));
+        x[thread_i]=(float*)mxMalloc(l_p*sizeof(float));
         fft_x[thread_i]=(fftwf_complex*)fftwf_malloc(l_p*sizeof(fftwf_complex));
     }
     
@@ -124,7 +124,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
             fftwf_execute_dft_c2r(p_c2r,fft_x[thread_i],x[thread_i]);
 
             for(i=0;i<n_samples;i++)
-                y[sensor_i*n_samples+i]=(double)(x[thread_i][i+l_b-2]/l_p);
+                y[sensor_i*n_samples+i]=(double)(x[thread_i][i+l_b-2]*n_factor);
         }
     }
     
