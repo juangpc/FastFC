@@ -27,35 +27,42 @@
 //
 #include <mex.h>
 #include <fftw3.h>
+#include <omp.h>
 
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 {
-    unsigned int sensor_i;
+    int sensor_i,thread_i;
     mwSize i;
-    float *b,*x;
+    float *b,**x;
     double *x_d,*b_d,*y;
-    fftwf_complex *fft_b,*fft_x;
+    fftwf_complex **fft_x,*fft_b;
     fftwf_plan p_r2c,p_c2r;
     
     const mwSize l_b=(mwSize)mxGetN(prhs[0]);
     const mwSize n_samples=(mwSize)mxGetM(prhs[1]);
-    const unsigned int n_sensors=(unsigned int)mxGetN(prhs[1]);
-    const short int mode=(short int)mxGetScalar(prhs[2]);
-            
+    const int n_sensors=(int)mxGetN(prhs[1]);
+    const int mode=(int)mxGetScalar(prhs[2]);
+    const int n_threads=(int)mxGetScalar(prhs[3]);
     const mwSize l_p=n_samples+2*(l_b-1);
-    const int is_even=(l_p%2)?0:1;
+    const float n_factor=(float)1./l_p;
 
     b_d=(double*)mxGetPr(prhs[0]);    
     x_d=(double*)mxGetPr(prhs[1]);
     
     b=(float*)mxMalloc(l_p*sizeof(float));
-    x=(float*)mxMalloc(l_p*sizeof(float));
-    fft_x=(fftwf_complex*)fftwf_malloc(l_p*sizeof(fftwf_complex));
+    x=(float**)mxMalloc(n_threads*sizeof(float*));
+    fft_x=(fftwf_complex**)mxMalloc(n_threads*sizeof(fftwf_complex*));
     fft_b=(fftwf_complex*)fftwf_malloc(l_p*sizeof(fftwf_complex));
     
     plhs[0]=mxCreateDoubleMatrix(n_samples,n_sensors,mxREAL);
     y=(double*)mxGetPr(plhs[0]);
 
+    for(thread_i=0;thread_i<n_threads;thread_i++)
+    {
+        x[thread_i]=(float*)mxMalloc(l_p*sizeof(float));
+        fft_x[thread_i]=(fftwf_complex*)fftwf_malloc(l_p*sizeof(fftwf_complex));
+    }
+    
     if(mode==3)
     {
         p_r2c=fftwf_plan_dft_r2c_1d((int)l_p,b,fft_b,FFTW_EXHAUSTIVE);
@@ -66,7 +73,6 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
         p_r2c=fftwf_plan_dft_r2c_1d((int)l_p,b,fft_b,FFTW_MEASURE);
         p_c2r=fftwf_plan_dft_c2r_1d((int)l_p,fft_b,b,FFTW_MEASURE);
     }
-
     else
     {
         p_r2c=fftwf_plan_dft_r2c_1d((int)l_p,b,fft_b,FFTW_ESTIMATE);
@@ -87,36 +93,49 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 	
 	fftwf_free(fft_b);  
 
-    for(sensor_i=0;sensor_i<n_sensors;sensor_i++)
+    omp_set_num_threads(n_threads);
+    #pragma omp parallel
     {
-        //copy sensor with circular padding
-        for(i=0;i<l_b-2;i++)
-            x[i]=((float)2.*(float)x_d[sensor_i*n_samples])-
-                    (float)x_d[sensor_i*n_samples+l_b-2-i];
-        for(;i<l_p-l_b;i++)
-            x[i]=(float)x_d[sensor_i*n_samples+i-l_b+2];
-        for(;i<l_p;i++)
-            x[i]=((float)2.*(float)x[l_p-l_b-1])-(float)x[2*(l_p-l_b-1)-i];
-    
-        //calc fft of sensor
-        fftwf_execute_dft_r2c(p_r2c,x,fft_x);
-
-        //filter in freq domain 
-        for(i=0;i<l_p/2+1;i++)
+        #pragma omp for private(sensor_i,i,thread_i)
+        for(sensor_i=0;sensor_i<n_sensors;sensor_i++)
         {
-            fft_x[i][0]*=b[i];
-            fft_x[i][1]*=b[i];
+            thread_i=omp_get_thread_num();
+
+            //copy sensor with circular padding
+            for(i=0;i<l_b-2;i++)
+                x[thread_i][i]=((float)2.*(float)x_d[sensor_i*n_samples])-
+                        (float)x_d[sensor_i*n_samples+l_b-2-i];
+            for(;i<l_p-l_b;i++)
+                x[thread_i][i]=(float)x_d[sensor_i*n_samples+i-l_b+2];
+            for(;i<l_p;i++)
+                x[thread_i][i]=((float)2.*(float)x[thread_i][l_p-l_b-1])-
+                        (float)x[thread_i][2*(l_p-l_b-1)-i];
+
+            //calc fft of sensor
+            fftwf_execute_dft_r2c(p_r2c,x[thread_i],fft_x[thread_i]);
+
+            //filter in freq domain 
+            for(i=0;i<l_p/2+1;i++)
+            {
+                fft_x[thread_i][i][0]*=b[i];
+                fft_x[thread_i][i][1]*=b[i];
+            }
+
+            fftwf_execute_dft_c2r(p_c2r,fft_x[thread_i],x[thread_i]);
+
+            for(i=0;i<n_samples;i++)
+                y[sensor_i*n_samples+i]=(double)(x[thread_i][i+l_b-2]*n_factor);
         }
-    
-        fftwf_execute_dft_c2r(p_c2r,fft_x,x);
-        
-        for(i=0;i<n_samples;i++)
-            y[sensor_i*n_samples+i]=(double)(x[i+l_b-2]/l_p);
     }
     
     fftwf_destroy_plan(p_r2c);
 	fftwf_destroy_plan(p_c2r);
-    fftwf_free(fft_x);
+    for(thread_i=0;thread_i<n_threads;thread_i++)
+    {   
+        mxFree(x[thread_i]);
+        fftwf_free(fft_x[thread_i]);
+    }
+    mxFree(fft_x);    
     mxFree(x);
     mxFree(b);    
 
