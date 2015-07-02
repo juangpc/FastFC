@@ -9,9 +9,9 @@ This is the main release branch of the repo. Please see other branches for acces
 - Generalized Synchronization measures: S, H, M, L
 - Generalized Synchronization measrues (version 2. faster): S, H, M.
 
-# General tool
+# Filtering tool
 - Zero-phase distorsion FIR filtering. 
-This filtering function has been built out of necessity.  It closely follows Matlab's filtfilt function. It performs an N-dimensional circular padding (N=filter order). 
+This filtering function has been built out of necessity.  It closely resembles Matlab's filtfilt built-in function implementation. It performs an N-dimensional circular padding (N=filter order). 
 
 # Complex Networks measures
 - Strength for weighted undirected networks.
