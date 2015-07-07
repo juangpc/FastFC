@@ -63,12 +63,12 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     p_r2c=fftwf_plan_dft_r2c_1d(n_samples,x_f,h,FFTW_EXHAUSTIVE);
     p_c2c=fftwf_plan_dft_1d(n_samples,h,a,FFTW_BACKWARD,FFTW_EXHAUSTIVE);
     } 
-    else if (mode==3)
+    else if (mode==2)
     {
     p_r2c=fftwf_plan_dft_r2c_1d(n_samples,x_f,h,FFTW_PATIENT);
     p_c2c=fftwf_plan_dft_1d(n_samples,h,a,FFTW_BACKWARD,FFTW_PATIENT);
     }
-    else if (mode==3)
+    else if (mode==1)
     {
     p_r2c=fftwf_plan_dft_r2c_1d(n_samples,x_f,h,FFTW_MEASURE);
     p_c2c=fftwf_plan_dft_1d(n_samples,h,a,FFTW_BACKWARD,FFTW_MEASURE);
