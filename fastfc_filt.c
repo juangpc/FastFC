@@ -15,7 +15,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     const mwSize n_samples=(mwSize)mxGetM(prhs[1]);
     const int n_sensors=(int)mxGetN(prhs[1]);
     const int mode=(int)mxGetScalar(prhs[2]);
-    const int n_threads=(int)mxGetScalar(prhs[3]);
+    const int n_threads=omp_get_num_procs();
     const mwSize l_p=n_samples+2*(l_b-1);
     const float n_factor=(float)1./l_p;
 
@@ -43,9 +43,14 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     }
     else if(mode==2)
     {
+        p_r2c=fftwf_plan_dft_r2c_1d((int)l_p,b,fft_b,FFTW_PATIENT);
+        p_c2r=fftwf_plan_dft_c2r_1d((int)l_p,fft_b,b,FFTW_PATIENT);
+    }
+    else if(mode==1)
+    {
         p_r2c=fftwf_plan_dft_r2c_1d((int)l_p,b,fft_b,FFTW_MEASURE);
         p_c2r=fftwf_plan_dft_c2r_1d((int)l_p,fft_b,b,FFTW_MEASURE);
-    }
+    }                                           
     else
     {
         p_r2c=fftwf_plan_dft_r2c_1d((int)l_p,b,fft_b,FFTW_ESTIMATE);
