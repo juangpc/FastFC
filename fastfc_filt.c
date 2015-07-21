@@ -1,22 +1,22 @@
 #include <mex.h>
-#include <stdio.h>
 #include <fftw3.h>
 
 
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 {
     
-    mwSize i,aux_i;
+    unsigned int i,aux_i;
     float *b,*x;
     double *x_d,*b_d,*y;
     fftwf_complex *fft_b,*fft_x;
     fftwf_plan p_r2c,p_c2r;
     
-    const mwSize l_b=(mwSize)mxGetN(prhs[0]);
-    const mwSize n_samples=(mwSize)mxGetM(prhs[1]);
-    const mwSize n_sensors=(mwSize)mxGetN(prhs[1]);
-    
-    const mwSize l_p=n_samples+2*(l_b-1);
+    const unsigned int l_b=(unsigned int)mxGetN(prhs[0]);
+    const unsigned int n_samples=(unsigned int)mxGetM(prhs[1]);
+    const unsigned int n_sensors=(unsigned int)mxGetN(prhs[1]);
+    const short int mode=(short int)mxGetScalar(prhs[2]);
+            
+    const unsigned int l_p=n_samples+2*(l_b-1);
     const int is_even=(l_p%2)?0:1;
 
     b_d=(double*)mxGetPr(prhs[0]);    
@@ -27,9 +27,22 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     fft_x=(fftwf_complex*)fftwf_malloc(l_p*sizeof(fftwf_complex));
     fft_b=(fftwf_complex*)fftwf_malloc(l_p*sizeof(fftwf_complex));
     
-    p_r2c=fftwf_plan_dft_r2c_1d(l_p,b,fft_b,FFTW_MEASURE);
-    p_c2r=fftwf_plan_dft_c2r_1d(l_p,fft_b,b,FFTW_MEASURE);
-    
+    if(mode==1)
+    {
+        p_r2c=fftwf_plan_dft_r2c_1d(l_p,b,fft_b,FFTW_ESTIMATE);
+        p_c2r=fftwf_plan_dft_c2r_1d(l_p,fft_b,b,FFTW_ESTIMATE);
+    }
+    else if(mode==2)
+    {
+        p_r2c=fftwf_plan_dft_r2c_1d(l_p,b,fft_b,FFTW_MEASURE);
+        p_c2r=fftwf_plan_dft_c2r_1d(l_p,fft_b,b,FFTW_MEASURE);
+    }                                           
+    else if(mode==3)
+    {
+        p_r2c=fftwf_plan_dft_r2c_1d(l_p,b,fft_b,FFTW_EXHAUSTIVE);
+        p_c2r=fftwf_plan_dft_c2r_1d(l_p,fft_b,b,FFTW_EXHAUSTIVE);
+    }                                           
+
     //copy b with normal padding
     for(i=0;i<l_b;i++)
         b[i]=(float)b_d[i];
@@ -42,9 +55,6 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     for(i=0;i<l_p/2+1;i++)
         b[i]=fft_b[i][0]*fft_b[i][0]+fft_b[i][1]*fft_b[i][1];
     
-    //no need for fft_b any more
-    fftwf_free(fft_b);
-
     //copy sensor with circular padding
     for(i=0;i<l_b-2;i++)
         x[i]=(2.*(float)x_d[0])-(float)x_d[l_b-2-i];
@@ -64,17 +74,18 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     }
     
     fftwf_execute_dft_c2r(p_c2r,fft_x,x);
-
     plhs[0]=mxCreateDoubleMatrix(n_samples,n_sensors,mxREAL);
     y=(double*)mxGetPr(plhs[0]);
     
     aux_i=0;
     for(i=l_b-2;i<l_p-l_b;i++)
-        y[aux_i++]=(double)(x[i]/(float)l_p);
+        y[aux_i++]=(double)(x[i]/l_p);
 
-    fftwf_free(fft_x);
-    fftwf_destroy_plan(p_r2c);
     fftwf_destroy_plan(p_c2r);
-    mxFree(x);
+    fftwf_destroy_plan(p_r2c);
+    fftwf_free(fft_b);    
+    fftwf_free(fft_x);
     mxFree(b);
+    mxFree(x);
+
 }
