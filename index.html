@@ -34,11 +34,11 @@ You can download the executable files (right now only available for Windows x64 
 <a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h3>
 
 <ol>
-<li>-Download the latest version of the executables precompiled functions from <a href="https://github.com/juangpc/FastFC/zipball/release">here</a>. Everything you need is in that folder.</li>
-<li>-Include that folder in Matlab's path.</li>
-<li>-Execute testing_fastFC.m from Matlab to check if everything works fine.</li>
-<li>-Read User Manual to understand input and output parameters of each function.</li>
-<li>-Enjoy!</li>
+<li>Download the latest version of the executables precompiled functions from <a href="https://github.com/juangpc/FastFC/zipball/release">here</a>. Everything you need is in that folder.</li>
+<li>Include that folder in Matlab's path.</li>
+<li>Execute testing_fastFC.m from Matlab to check if everything works fine.</li>
+<li>Read User Manual to understand input and output parameters of each function.</li>
+<li>Enjoy!</li>
 </ol>
 
 <p>If a software package needs to be installed a “specified module could not be found” error message will appear in Matlab’s command line window. For normal installations, all necessary .dll libraries are included and in general, users do not need any further installation. Check out these links to see if this problem can be solved.</p>
@@ -50,11 +50,13 @@ You can download the executable files (right now only available for Windows x64 
 <h3>
 <a id="user-manual" class="anchor" href="#user-manual" aria-hidden="true"><span class="octicon octicon-link"></span></a>User Manual</h3>
 
-<p>In general terms, Functional Connectivity matrices are computed compactly. Input data is conceived as the whole matrix, column ordered. Each resulting connectivity matrix will be a squared matrix with the same number of rows and columns as the number of columns (number of sensors) of the input data.
-This approach can derive in an out-of-memory problem when dealing with big data matrices (this is particularly the case of Generalized Synchronization algorithm which is very memory demanding). However, this problem can easily be circumvented by calling the function once for each pair of sensors, and collecting the Functional Connectivity index from the resulting squared matrix of size two.
+<p>In general terms, Functional Connectivity matrices are computed compactly. Input data is conceived as the whole matrix, column ordered. Each resulting connectivity matrix will be a squared matrix with the same number of rows and columns as the number of columns (number of sensors) of the input data.</p>
+
+<p>This approach can derive in an out-of-memory problem when dealing with big data matrices (this is particularly the case of Generalized Synchronization algorithm which is very memory demanding). However, this problem can easily be circumvented by calling the function once for each pair of sensors, and collecting the Functional Connectivity index from the resulting squared matrix of size two.
 Equally, all functions computing network indices compute the specified index for every node in the network. This implementation tries to resemble as much as possible Brain Connectivity Toolbox behavior. 
-All functions in FastFC are directly accessible from the command line window of Matlab. During execution, each function polls the number of CPU cores present in the computer and deploys an equal number of parallel threads for computing the desired index.
-Both functions using FFTW subroutine library are the zero phase distortion filter and Phase Synchronization. They both have an input parameter called mode, which allows deciding how exhaustive the search for the optimal FFT algorithm should be. This is a FFTW feature which has been maintained through FastFC. Sometimes it is a good idea to spend a few seconds or even minutes searching for a good algorithm for FFT that can significantly improve performance of subsequent executions. Typically an initial search at the beginning of each MATLAB session can take a few minutes, ensuring an efficient execution which last much less time in every subsequent call to the function. However in general terms mode=1 is more convininent. </p>
+All functions in FastFC are directly accessible from the command line window of Matlab. During execution, each function polls the number of CPU cores present in the computer and deploys an equal number of parallel threads for computing the desired index.</p>
+
+<p>Both functions using FFTW subroutine library are the zero phase distortion filter and Phase Synchronization. They both have an input parameter called mode, which allows deciding how exhaustive the search for the optimal FFT algorithm should be. This is a FFTW feature which has been maintained through FastFC. Sometimes it is a good idea to spend a few seconds or even minutes searching for a good algorithm for FFT that can significantly improve performance of subsequent executions. Typically an initial search at the beginning of each MATLAB session can take a few minutes, ensuring an efficient execution which last much less time in every subsequent call to the function. However in general terms mode=1 is more convininent. </p>
 
 <h2>
 <a id="zero-phase-distortion-filter" class="anchor" href="#zero-phase-distortion-filter" aria-hidden="true"><span class="octicon octicon-link"></span></a>Zero phase distortion filter</h2>
@@ -89,24 +91,36 @@ It is important to understand an additional input parameter of this function: sa
 <li>        mode = 2 -&gt; execute slower the first time, but consider possible faster algorithms.</li>
 <li>        mode = 3 -&gt; execute slowest the first time, but consider the fastest algorithm.
 Output parameters:
-<em>plv = Phase Locking Value Functional Connectivity matrix.
+*plv = Phase Locking Value Functional Connectivity matrix.
 *pval_plv = pvalue for each index of the PLV matrix. 
 *pli = Phase Locking Index Functional Connectivity matrix.
-*wPli = weighted Phase Locking Functional Connectivity matrix.
-## Mutual Information
-The function implementing the calculation of MI index using k-nearest neighbours, and its corresponding input/output parameters, is defined below.
-*</em>[mi]=fastfc_mi(data,emb_dim,tau,k);**
-Input parameters:</li>
+*wPli = weighted Phase Locking Functional Connectivity matrix.</li>
+</ul>
+
+<h2>
+<a id="mutual-information" class="anchor" href="#mutual-information" aria-hidden="true"><span class="octicon octicon-link"></span></a>Mutual Information</h2>
+
+<p>The function implementing the calculation of MI index using k-nearest neighbours, and its corresponding input/output parameters, is defined below.</p>
+
+<p><strong>[mi]=fastfc_mi(data,emb_dim,tau,k);</strong></p>
+
+<p>Input parameters:</p>
+
+<ul>
 <li>data = eeg data (sensors by columns).</li>
 <li>emb_dim = embedding dimensions to consider</li>
 <li>tau = time lag to consider for embedding</li>
 <li>k = number of neighbours to consider
 Output parameters:
-<em>mi = Mutual Information Functional Connectivity matrix
-## Generalized Synchronization
-The function implementing the calculation of GS indices: S, H, M and L, and its corresponding input/output parameters, is defined below.
-*</em>[S,H,M,L]=fastfc_gs(data,emb_dim,tau,k,w,states_eff_step)**</li>
+*mi = Mutual Information Functional Connectivity matrix</li>
 </ul>
+
+<h2>
+<a id="generalized-synchronization" class="anchor" href="#generalized-synchronization" aria-hidden="true"><span class="octicon octicon-link"></span></a>Generalized Synchronization</h2>
+
+<p>The function implementing the calculation of GS indices: S, H, M and L, and its corresponding input/output parameters, is defined below.</p>
+
+<p><strong>[S,H,M,L]=fastfc_gs(data,emb_dim,tau,k,w,states_eff_step)</strong></p>
 
 <p>Input parameters:</p>
 
@@ -118,21 +132,26 @@ The function implementing the calculation of GS indices: S, H, M and L, and its 
 <li>w = window correction for neighbour finding</li>
 <li>states_eff_step = state-space down sampling to consider when calculating distances 
 Output parameters: 
-<em>S, H, M and L = Functional Connectivity matrices for each index.
-## Strength
-*</em>[S]=fastfc_strength_wu(A)**</li>
+*S, H, M and L = Functional Connectivity matrices for each index.</li>
 </ul>
+
+<h2>
+<a id="strength" class="anchor" href="#strength" aria-hidden="true"><span class="octicon octicon-link"></span></a>Strength</h2>
+
+<p><strong>[S]=fastfc_strength_wu(A)</strong></p>
 
 <p>Input parameters: </p>
 
 <ul>
 <li>A = adjacency matrix of real values between 0 and 1, with zeroed principal diagonal elements.
 Output parameters:</li>
-<li>C = a row matrix where every value represents the Strength of each node. 
-## Clustering Coefficient
-<strong>[C]=fastfc_cluster_coef_wu(A)</strong>
-</li>
+<li>C = a row matrix where every value represents the Strength of each node. </li>
 </ul>
+
+<h2>
+<a id="clustering-coefficient" class="anchor" href="#clustering-coefficient" aria-hidden="true"><span class="octicon octicon-link"></span></a>Clustering Coefficient</h2>
+
+<p><strong>[C]=fastfc_cluster_coef_wu(A)</strong></p>
 
 <p>Input parameters: 
 *A = adjacency matrix of nodes by nodes. Values between 0 and 1. Principal diagonal is zero. 
