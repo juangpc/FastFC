@@ -56,7 +56,7 @@ You can download the executable files (right now only available for Windows x64 
 Equally, all functions computing network indices compute the specified index for every node in the network. This implementation tries to resemble as much as possible Brain Connectivity Toolbox behavior. 
 All functions in FastFC are directly accessible from the command line window of Matlab. During execution, each function polls the number of CPU cores present in the computer and deploys an equal number of parallel threads for computing the desired index.</p>
 
-<p>Both functions using FFTW subroutine library are the zero phase distortion filter and Phase Synchronization. They both have an input parameter called mode, which allows deciding how exhaustive the search for the optimal FFT algorithm should be. This is a FFTW feature which has been maintained through FastFC. Sometimes it is a good idea to spend a few seconds or even minutes searching for a good algorithm for FFT that can significantly improve performance of subsequent executions. Typically an initial search at the beginning of each MATLAB session can take a few minutes, ensuring an efficient execution which last much less time in every subsequent call to the function. However in general terms mode=1 is more convininent. </p>
+<p>Both functions using FFTW subroutine library are the zero phase distortion filter and Phase Synchronization. They both have an input parameter called mode, which allows deciding how exhaustive the search for the optimal FFT algorithm should be. This is a FFTW feature which has been maintained through FastFC. Sometimes it is a good idea to spend a few seconds or even minutes searching for a good algorithm for FFT that can significantly improve performance of subsequent executions. Typically an initial search at the beginning of each MATLAB session can take a few minutes, ensuring an efficient execution which last much less time in every subsequent call to the function. However in general terms mode=1 is more convenient.</p>
 
 <h2>
 <a id="zero-phase-distortion-filter" class="anchor" href="#zero-phase-distortion-filter" aria-hidden="true"><span class="octicon octicon-link"></span></a>Zero phase distortion filter</h2>
@@ -66,8 +66,8 @@ Input parameters:
 *filter = row vector with filter denominator coefficients.
 *data = column matrix with data to be filtered. Each sensor should be each column.
 *mode = mode for FFT scheduling
-*mode = 0 ,  execute fastest but suboptimal.
-*mode = 1 , execute fast but in a suboptimal algorithm.
+*mode = 0 ,  execute fastest but sub-optimal.
+*mode = 1 , execute fast but in a sub-optimal algorithm.
 *mode = 2 , execute slower the first time, but consider possible faster algorithms.
 *mode = 3 , execute slowest the first time, but consider the fastest algorithm.
 Output parameters:
