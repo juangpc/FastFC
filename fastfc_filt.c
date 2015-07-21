@@ -3,6 +3,7 @@
 
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 {
+    unsigned int sensor_i;
     mwSize i;
     float *b,*x;
     double *x_d,*b_d,*y;
@@ -25,6 +26,9 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     fft_x=(fftwf_complex*)fftwf_malloc(l_p*sizeof(fftwf_complex));
     fft_b=(fftwf_complex*)fftwf_malloc(l_p*sizeof(fftwf_complex));
     
+    plhs[0]=mxCreateDoubleMatrix(n_samples,n_sensors,mxREAL);
+    y=(double*)mxGetPr(plhs[0]);
+
     if(mode==3)
     {
         p_r2c=fftwf_plan_dft_r2c_1d((int)l_p,b,fft_b,FFTW_EXHAUSTIVE);
@@ -56,36 +60,37 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 	
 	fftwf_free(fft_b);  
 
-    //copy sensor with circular padding
-    for(i=0;i<l_b-2;i++)
-        x[i]=((float)2.*(float)x_d[0])-(float)x_d[l_b-2-i];
-    for(;i<l_p-l_b;i++)
-        x[i]=(float)x_d[i-l_b+2];
-    for(;i<l_p;i++)
-        x[i]=((float)2.*(float)x[l_p-l_b-1])-(float)x[2*(l_p-l_b-1)-i];
-    
-    //calc fft of sensor
-    fftwf_execute_dft_r2c(p_r2c,x,fft_x);
-	fftwf_destroy_plan(p_r2c);
-
-    //filter in freq domain 
-    for(i=0;i<l_p/2+1;i++)
+    for(sensor_i=0;sensor_i<n_sensors;sensor_i++)
     {
-        fft_x[i][0]*=b[i];
-        fft_x[i][1]*=b[i];
+        //copy sensor with circular padding
+        for(i=0;i<l_b-2;i++)
+            x[i]=((float)2.*(float)x_d[sensor_i*n_samples])-
+                    (float)x_d[sensor_i*n_samples+l_b-2-i];
+        for(;i<l_p-l_b;i++)
+            x[i]=(float)x_d[sensor_i*n_samples+i-l_b+2];
+        for(;i<l_p;i++)
+            x[i]=((float)2.*(float)x[l_p-l_b-1])-(float)x[2*(l_p-l_b-1)-i];
+    
+        //calc fft of sensor
+        fftwf_execute_dft_r2c(p_r2c,x,fft_x);
+
+        //filter in freq domain 
+        for(i=0;i<l_p/2+1;i++)
+        {
+            fft_x[i][0]*=b[i];
+            fft_x[i][1]*=b[i];
+        }
+    
+        fftwf_execute_dft_c2r(p_c2r,fft_x,x);
+        
+        for(i=0;i<n_samples;i++)
+            y[sensor_i*n_samples+i]=(double)(x[i+l_b-2]/l_p);
     }
-    mxFree(b);    
     
-	fftwf_execute_dft_c2r(p_c2r,fft_x,x);
-    
+    fftwf_destroy_plan(p_r2c);
 	fftwf_destroy_plan(p_c2r);
     fftwf_free(fft_x);
-
-    plhs[0]=mxCreateDoubleMatrix(n_samples,n_sensors,mxREAL);
-    y=(double*)mxGetPr(plhs[0]);
-    
-    for(i=0;i<n_samples;i++)
-        y[i]=(double)(x[i+l_b-2]/l_p);
-
     mxFree(x);
+    mxFree(b);    
+
 }
