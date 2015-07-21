@@ -25,8 +25,8 @@
 %% FastFC testing script
 
 % configure number of sensors and samples
-n_samples=4000;
-n_sensors=200;
+n_samples=1000;
+n_sensors=100;
 x=randn(n_samples,n_sensors); % remember columnwise matrix of each sensor.
 
 %% 
@@ -156,6 +156,15 @@ tic;[D,L,B]=fastfc_betweenness_cent_w(W);t_B=toc;
 disp(' Function ''fastfc_shortest_path_length_w'' is working properly.');
 disp([' FastFC calculation of Shortest Path Length index took: ' num2str(t_B) ' seconds.']);
 disp(' ');
+
+%% Acknoledgements
+disp(' ............ Fast FC is working rock solid. Thankyou')
+disp(' ');
+disp(' This file is part of Fast Functional Connectivity (FastFC)');
+disp(' Please consider helping by citing our work');
+disp(' http://juangpc.github.io/FastFC/');
+disp(' ');
+
 
 
 
