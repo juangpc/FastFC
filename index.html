@@ -59,83 +59,84 @@ Both functions using FFTW subroutine library are the zero phase distortion filte
 <a id="zero-phase-distortion-filter" class="anchor" href="#zero-phase-distortion-filter" aria-hidden="true"><span class="octicon octicon-link"></span></a>Zero phase distortion filter</h2>
 
 <p><strong>y=fastfc_filt(filter,data,mode)</strong>
-Input parameters:
-filter = row vector with filter denominator coefficients.
-data = column matrix with data to be filtered. Each sensor should be each column.
-mode = mode for FFT scheduling
-mode = 0 ,  execute fastest but suboptimal.
-mode = 1 , execute fast but in a suboptimal algorithm.
-mode = 2 , execute slower the first time, but consider possible faster algorithms.
-mode = 3 , execute slowest the first time, but consider the fastest algorithm.
-Output parameters:
-y = array the same size of data, with each column corresponding to each filtered column of data.</p>
+Input parameters:</p>
 
-<h2>
-<a id="phase-synchronization" class="anchor" href="#phase-synchronization" aria-hidden="true"><span class="octicon octicon-link"></span></a>Phase Synchronization</h2>
-
-<p>PLV. PLI. wPLI are all computed (along with the estimated significance of the PLV) within the MEX function fastfc_ps directly invoked from the MATLAB environment.
-It is important to understand an additional input parameter of this function: samples_to_discard is the number of data samples to discard, to prevent edge effects during the estimation of the Hilbert Transform. The function uses an FFT-based algorithm to estimate the Hilbert Transform, after mirror padding the data, so that discarding of data should be used only for narrow signals where serious edge effects are suspected.</p>
+<ul>
+<li>filter = row vector with filter denominator coefficients.</li>
+<li>data = column matrix with data to be filtered. Each sensor should be each column.</li>
+<li>mode = mode for FFT scheduling</li>
+<li>mode = 0 ,  execute fastest but suboptimal.</li>
+<li>mode = 1 , execute fast but in a suboptimal algorithm.</li>
+<li>mode = 2 , execute slower the first time, but consider possible faster algorithms.</li>
+<li>mode = 3 , execute slowest the first time, but consider the fastest algorithm.
+Output parameters:</li>
+<li>y = array the same size of data, with each column corresponding to each filtered column of data.
+## Phase Synchronization
+PLV. PLI. wPLI are all computed (along with the estimated significance of the PLV) within the MEX function fastfc_ps directly invoked from the MATLAB environment.
+It is important to understand an additional input parameter of this function: samples_to_discard is the number of data samples to discard, to prevent edge effects during the estimation of the Hilbert Transform. The function uses an FFT-based algorithm to estimate the Hilbert Transform, after mirror padding the data, so that discarding of data should be used only for narrow signals where serious edge effects are suspected.</li>
+</ul>
 
 <p><strong>[plv,pval_plv,pli,wpli]=fastfc_ps(data,samples_to_discard,mode)</strong></p>
 
-<p>Input parameters:
-data = data (sensors by columns).
-samples_to_discard = samples to discard at the beginning and samples to discard at the end of the phase signals. i.e. To discard 200 samples at the beginning and 200 samples at the end of each sensor, samples_to_discard should equal 200.
-        mode = 0 -&gt; execute fastest but suboptimal.
-        mode = 1 -&gt; execute fast but in a suboptimal algorithm.
-        mode = 2 -&gt; execute slower the first time, but consider possible faster algorithms.
-        mode = 3 -&gt; execute slowest the first time, but consider the fastest algorithm.
+<p>Input parameters:</p>
+
+<ul>
+<li>data = data (sensors by columns).</li>
+<li>samples_to_discard = samples to discard at the beginning and samples to discard at the end of the phase signals. i.e. To discard 200 samples at the beginning and 200 samples at the end of each sensor, samples_to_discard should equal 200.</li>
+<li>        mode = 0 -&gt; execute fastest but suboptimal.</li>
+<li>        mode = 1 -&gt; execute fast but in a suboptimal algorithm.</li>
+<li>        mode = 2 -&gt; execute slower the first time, but consider possible faster algorithms.</li>
+<li>        mode = 3 -&gt; execute slowest the first time, but consider the fastest algorithm.
 Output parameters:
-plv = Phase Locking Value Functional Connectivity matrix.
-pval_plv = pvalue for each index of the PLV matrix. 
-Pli = Phase Locking Index Functional Connectivity matrix.
-wPli = weighted Phase Locking Functional Connectivity matrix.</p>
-
-<h2>
-<a id="mutual-information" class="anchor" href="#mutual-information" aria-hidden="true"><span class="octicon octicon-link"></span></a>Mutual Information</h2>
-
-<p>The function implementing the calculation of MI index using k-nearest neighbours, and its corresponding input/output parameters, is defined below.
-<strong>[mi]=fastfc_mi(data,emb_dim,tau,k);</strong>
-Input parameters:
-data = eeg data (sensors by columns).
-emb_dim = embedding dimensions to consider
-tau = time lag to consider for embedding
-k = number of neighbours to consider
+<em>plv = Phase Locking Value Functional Connectivity matrix.
+*pval_plv = pvalue for each index of the PLV matrix. 
+*pli = Phase Locking Index Functional Connectivity matrix.
+*wPli = weighted Phase Locking Functional Connectivity matrix.
+## Mutual Information
+The function implementing the calculation of MI index using k-nearest neighbours, and its corresponding input/output parameters, is defined below.
+*</em>[mi]=fastfc_mi(data,emb_dim,tau,k);**
+Input parameters:</li>
+<li>data = eeg data (sensors by columns).</li>
+<li>emb_dim = embedding dimensions to consider</li>
+<li>tau = time lag to consider for embedding</li>
+<li>k = number of neighbours to consider
 Output parameters:
-    mi = Mutual Information Functional Connectivity matrix</p>
+<em>mi = Mutual Information Functional Connectivity matrix
+## Generalized Synchronization
+The function implementing the calculation of GS indices: S, H, M and L, and its corresponding input/output parameters, is defined below.
+*</em>[S,H,M,L]=fastfc_gs(data,emb_dim,tau,k,w,states_eff_step)**</li>
+</ul>
 
-<h2>
-<a id="generalized-synchronization" class="anchor" href="#generalized-synchronization" aria-hidden="true"><span class="octicon octicon-link"></span></a>Generalized Synchronization</h2>
+<p>Input parameters:</p>
 
-<p>The function implementing the calculation of GS indices: S, H, M and L, and its corresponding input/output parameters, is defined below.
-<strong>[S,H,M,L]=fastfc_gs(data,emb_dim,tau,k,w,states_eff_step)</strong></p>
-
-<p>Input parameters:
-data = eeg data (sensors by columns).
-emb_dim = embedding dimension 
-tau = time lag for embedding
-k = number of neighbours to consider
-w = window correction for neighbour finding
-states_eff_step = state-space down sampling to consider when calculating distances 
+<ul>
+<li>data = eeg data (sensors by columns).</li>
+<li>emb_dim = embedding dimension </li>
+<li>tau = time lag for embedding</li>
+<li>k = number of neighbours to consider</li>
+<li>w = window correction for neighbour finding</li>
+<li>states_eff_step = state-space down sampling to consider when calculating distances 
 Output parameters: 
-    S, H, M and L = Functional Connectivity matrices for each index.</p>
+<em>S, H, M and L = Functional Connectivity matrices for each index.
+## Strength
+*</em>[S]=fastfc_strength_wu(A)**</li>
+</ul>
 
-<h2>
-<a id="strength" class="anchor" href="#strength" aria-hidden="true"><span class="octicon octicon-link"></span></a>Strength</h2>
+<p>Input parameters: </p>
 
-<p>** [S]=fastfc_strength_wu(A)**</p>
+<ul>
+<li>A = adjacency matrix of real values between 0 and 1, with zeroed principal diagonal elements.
+Output parameters:</li>
+<li>C = a row matrix where every value represents the Strength of each node. 
+## Clustering Coefficient
+<strong>[C]=fastfc_cluster_coef_wu(A)</strong>
+</li>
+</ul>
 
 <p>Input parameters: 
-A = adjacency matrix of real values between 0 and 1, with zeroed principal diagonal elements.
+*A = adjacency matrix of nodes by nodes. Values between 0 and 1. Principal diagonal is zero. 
 Output parameters:
-C = a row matrix where every value represents the Strength of each node. 
-7.4.6.  Clustering Coefficient
-[C]=fastfc_cluster_coef_wu(A)</p>
-
-<p>Input parameters: 
-A = adjacency matrix of nodes by nodes. Values between 0 and 1. Principal diagonal is zero. 
-Output parameters:
-C= column matrix where every value represents the Clustering Coefficient of each node. </p>
+*C= column matrix where every value represents the Clustering Coefficient of each node. </p>
 
 <h2>
 <a id="shortest-path-length" class="anchor" href="#shortest-path-length" aria-hidden="true"><span class="octicon octicon-link"></span></a>Shortest Path Length</h2>
@@ -143,10 +144,10 @@ C= column matrix where every value represents the Clustering Coefficient of each
 <p><strong>[D,L]=fastfc_shortest_path_length_w(W)</strong></p>
 
 <p>Input parameters: 
-W = directed or undirected weighted connection length matrix.Typically W is obtained by inverting each element in the Functional Connectivity matrix, transforming therefore between weights to length. 
+*W = directed or undirected weighted connection length matrix.Typically W is obtained by inverting each element in the Functional Connectivity matrix, transforming therefore between weights to length. 
 Output parameters:
-D = distance matrix between nodes (shortest weighted path).
-L = number of edges in each shortest weighted path.</p>
+*D = distance matrix between nodes (shortest weighted path).
+*L = number of edges in each shortest weighted path.</p>
 
 <h2>
 <a id="betweenness-centrality" class="anchor" href="#betweenness-centrality" aria-hidden="true"><span class="octicon octicon-link"></span></a>Betweenness Centrality</h2>
@@ -155,7 +156,7 @@ L = number of edges in each shortest weighted path.</p>
 <strong>[D,L,BC]=fastfc_betweenness_cent_w(W)</strong></p>
 
 <p>Input parameters: 
-    W = directed or undirected connection-length matrix.
+*W = directed or undirected connection-length matrix.
 Output parameters:
 D = distance matrix between nodes (shortest weighted path).
 L = number of edges in each shortest weighted path.
