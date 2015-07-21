@@ -14,16 +14,16 @@
       <h1 class="project-name">FastFC</h1>
       <h2 class="project-tagline">Fast Functional Connectivity Toolbox</h2>
       <a href="https://github.com/juangpc/FastFC" class="btn">View on GitHub</a>
-      <a href="https://github.com/juangpc/FastFC/zipball/release" class="btn">Download .zip</a>
-      <a href="https://github.com/juangpc/FastFC/tarball/release" class="btn">Download .tar.gz</a>
+      <a href="https://github.com/juangpc/FastFC/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/juangpc/FastFC/tarball/master" class="btn">Download .tar.gz</a>
     </section>
 
     <section class="main-content">
       <h3>
 <a id="welcome-to-fast-functional-connectivity-toolbox" class="anchor" href="#welcome-to-fast-functional-connectivity-toolbox" aria-hidden="true"><span class="octicon octicon-link"></span></a>Welcome to Fast Functional Connectivity Toolbox.</h3>
 
-<p>This toolbox is the result of an effort to improve efficiency for Functional Connectivity measures.
-You can download the executable files (right now only available for Windows x64 sytems) here. All functions are developed so that they can be called directly from Matlab's command line.</p>
+<p>FastFC is the result of an effort to improve efficiency for Functional Connectivity and related Network measures.
+You can download the executable files (right now only available for Windows x64 systems) here. All functions are developed so that they can be called directly from Matlab's command line.</p>
 
 <h3>
 <a id="acknowledgements" class="anchor" href="#acknowledgements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Acknowledgements</h3>
@@ -31,20 +31,145 @@ You can download the executable files (right now only available for Windows x64 
 <p>Please do cite our work: </p>
 
 <h3>
-<a id="instructions" class="anchor" href="#instructions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Instructions</h3>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h3>
 
 <ul>
-<li>Download executables from here.</li>
-<li>Include folder in Matlab's path.</li>
-<li>Make sure you have installed appropriate .dll files for multithread execution. You can download them from here --&gt;</li>
-<li>Make sure you have an updated version of FFTW's .dll files. You can download them from here --&gt;</li>
+<li>Download the latest version of the executables precompiled functions from <a href="https://github.com/juangpc/FastFC/zipball/release">here</a>. Everything you need is in that folder.</li>
+<li>Include that folder in Matlab's path.</li>
+<li>Execute testing_fastFC.m from Matlab to check if everything works fine.</li>
+<li>Read User Manual to understand input and output parameters of each function.</li>
 <li>Enjoy!</li>
 </ul>
+
+<p>If a software package needs to be installed a “specified module could not be found” error message will appear in Matlab’s command line window. For normal installations, all necessary .dll libraries are included and in general, users do not need any further installation. Check out these links to see if this problem can be solved.</p>
+
+<p>Microsoft Windows library for multi-thread execution can be found <a href="http://www.microsoft.com/en-us/download/confirmation.aspx?id=30679">here</a>.
+FFTW library for Microsoft Windows 64bit systems can be found <a href="http://fftw.org/install/windows.html">here</a>.  </p>
+
+<h3>
+<a id="user-manual" class="anchor" href="#user-manual" aria-hidden="true"><span class="octicon octicon-link"></span></a>User Manual</h3>
+
+<p>In general terms, Functional Connectivity matrices are computed compactly. Input data is conceived as the whole matrix, column ordered. Each resulting connectivity matrix will be a squared matrix with the same number of rows and columns as the number of columns (number of sensors) of the input data.
+This approach can derive in an out-of-memory problem when dealing with big data matrices (this is particularly the case of Generalized Synchronization algorithm which is very memory demanding). However, this problem can easily be circumvented by calling the function once for each pair of sensors, and collecting the Functional Connectivity index from the resulting squared matrix of size two.
+Equally, all functions computing network indices compute the specified index for every node in the network. This implementation tries to resemble as much as possible Brain Connectivity Toolbox behavior. 
+All functions in FastFC are directly accessible from the command line window of Matlab. During execution, each function polls the number of CPU cores present in the computer and deploys an equal number of parallel threads for computing the desired index.
+Both functions using FFTW subroutine library are the zero phase distortion filter and Phase Synchronization. They both have an input parameter called mode, which allows deciding how exhaustive the search for the optimal FFT algorithm should be. This is a FFTW feature which has been maintained through FastFC. Sometimes it is a good idea to spend a few seconds or even minutes searching for a good algorithm for FFT that can significantly improve performance of subsequent executions. Typically an initial search at the beginning of each MATLAB session can take a few minutes, ensuring an efficient execution which last much less time in every subsequent call to the function. However in general terms mode=1 is more convininent. </p>
+
+<h2>
+<a id="zero-phase-distortion-filter" class="anchor" href="#zero-phase-distortion-filter" aria-hidden="true"><span class="octicon octicon-link"></span></a>Zero phase distortion filter</h2>
+
+<p><strong>y=fastfc_filt(filter,data,mode)</strong>
+Input parameters:
+filter = row vector with filter denominator coefficients.
+data = column matrix with data to be filtered. Each sensor should be each column.
+mode = mode for FFT scheduling
+mode = 0 ,  execute fastest but suboptimal.
+mode = 1 , execute fast but in a suboptimal algorithm.
+mode = 2 , execute slower the first time, but consider possible faster algorithms.
+mode = 3 , execute slowest the first time, but consider the fastest algorithm.
+Output parameters:
+y = array the same size of data, with each column corresponding to each filtered column of data.</p>
+
+<h2>
+<a id="phase-synchronization" class="anchor" href="#phase-synchronization" aria-hidden="true"><span class="octicon octicon-link"></span></a>Phase Synchronization</h2>
+
+<p>PLV. PLI. wPLI are all computed (along with the estimated significance of the PLV) within the MEX function fastfc_ps directly invoked from the MATLAB environment.
+It is important to understand an additional input parameter of this function: samples_to_discard is the number of data samples to discard, to prevent edge effects during the estimation of the Hilbert Transform. The function uses an FFT-based algorithm to estimate the Hilbert Transform, after mirror padding the data, so that discarding of data should be used only for narrow signals where serious edge effects are suspected.</p>
+
+<p><strong>[plv,pval_plv,pli,wpli]=fastfc_ps(data,samples_to_discard,mode)</strong></p>
+
+<p>Input parameters:
+data = data (sensors by columns).
+samples_to_discard = samples to discard at the beginning and samples to discard at the end of the phase signals. i.e. To discard 200 samples at the beginning and 200 samples at the end of each sensor, samples_to_discard should equal 200.
+        mode = 0 -&gt; execute fastest but suboptimal.
+        mode = 1 -&gt; execute fast but in a suboptimal algorithm.
+        mode = 2 -&gt; execute slower the first time, but consider possible faster algorithms.
+        mode = 3 -&gt; execute slowest the first time, but consider the fastest algorithm.
+Output parameters:
+plv = Phase Locking Value Functional Connectivity matrix.
+pval_plv = pvalue for each index of the PLV matrix. 
+Pli = Phase Locking Index Functional Connectivity matrix.
+wPli = weighted Phase Locking Functional Connectivity matrix.</p>
+
+<h2>
+<a id="mutual-information" class="anchor" href="#mutual-information" aria-hidden="true"><span class="octicon octicon-link"></span></a>Mutual Information</h2>
+
+<p>The function implementing the calculation of MI index using k-nearest neighbours, and its corresponding input/output parameters, is defined below.
+<strong>[mi]=fastfc_mi(data,emb_dim,tau,k);</strong>
+Input parameters:
+data = eeg data (sensors by columns).
+emb_dim = embedding dimensions to consider
+tau = time lag to consider for embedding
+k = number of neighbours to consider
+Output parameters:
+    mi = Mutual Information Functional Connectivity matrix</p>
+
+<h2>
+<a id="generalized-synchronization" class="anchor" href="#generalized-synchronization" aria-hidden="true"><span class="octicon octicon-link"></span></a>Generalized Synchronization</h2>
+
+<p>The function implementing the calculation of GS indices: S, H, M and L, and its corresponding input/output parameters, is defined below.
+<strong>[S,H,M,L]=fastfc_gs(data,emb_dim,tau,k,w,states_eff_step)</strong></p>
+
+<p>Input parameters:
+data = eeg data (sensors by columns).
+emb_dim = embedding dimension 
+tau = time lag for embedding
+k = number of neighbours to consider
+w = window correction for neighbour finding
+states_eff_step = state-space down sampling to consider when calculating distances 
+Output parameters: 
+    S, H, M and L = Functional Connectivity matrices for each index.</p>
+
+<h2>
+<a id="strength" class="anchor" href="#strength" aria-hidden="true"><span class="octicon octicon-link"></span></a>Strength</h2>
+
+<p>** [S]=fastfc_strength_wu(A)**</p>
+
+<p>Input parameters: 
+A = adjacency matrix of real values between 0 and 1, with zeroed principal diagonal elements.
+Output parameters:
+C = a row matrix where every value represents the Strength of each node. 
+7.4.6.  Clustering Coefficient
+[C]=fastfc_cluster_coef_wu(A)</p>
+
+<p>Input parameters: 
+A = adjacency matrix of nodes by nodes. Values between 0 and 1. Principal diagonal is zero. 
+Output parameters:
+C= column matrix where every value represents the Clustering Coefficient of each node. </p>
+
+<h2>
+<a id="shortest-path-length" class="anchor" href="#shortest-path-length" aria-hidden="true"><span class="octicon octicon-link"></span></a>Shortest Path Length</h2>
+
+<p><strong>[D,L]=fastfc_shortest_path_length_w(W)</strong></p>
+
+<p>Input parameters: 
+W = directed or undirected weighted connection length matrix.Typically W is obtained by inverting each element in the Functional Connectivity matrix, transforming therefore between weights to length. 
+Output parameters:
+D = distance matrix between nodes (shortest weighted path).
+L = number of edges in each shortest weighted path.</p>
+
+<h2>
+<a id="betweenness-centrality" class="anchor" href="#betweenness-centrality" aria-hidden="true"><span class="octicon octicon-link"></span></a>Betweenness Centrality</h2>
+
+<p>Node Betweenness Centrality 
+<strong>[D,L,BC]=fastfc_betweenness_cent_w(W)</strong></p>
+
+<p>Input parameters: 
+    W = directed or undirected connection-length matrix.
+Output parameters:
+D = distance matrix between nodes (shortest weighted path).
+L = number of edges in each shortest weighted path.
+BC = node Betweenness Centrality for each node in the network.</p>
+
+<h3>
+<a id="developers" class="anchor" href="#developers" aria-hidden="true"><span class="octicon octicon-link"></span></a>Developers</h3>
+
+<p>The complete source-code of this project is available at the GitHub page for <a href="https://github.com/juangpc/FastFC">FastFC</a>. Each family of measures is separated in its own branch. Whenever an improvement is made to a function, the final compilation result is copied into the default branch called “release”.</p>
 
 <h3>
 <a id="contact--support" class="anchor" href="#contact--support" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contact &amp; Support</h3>
 
-<p>If you have any doubt or would like to help with Fast FC, please contact me.</p>
+<p>If you have any doubt or would like to help with Fast FC, please contact me. juangpc (at) ull.edu.es</p>
 
 <p>Juan Garcia-Prieto </p>
 
