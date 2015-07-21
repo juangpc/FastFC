@@ -76,7 +76,7 @@ disp(' Function ''fastfc_mi'' is working properly.');
 disp([' FastFC calculation of Mutual Information index took: ' num2str(t_mi) ' seconds.']);
 disp(' ');
 
-%% Testing Mutual Info
+%% Testing Generalized Synchronization
 disp(' Starting Generalized Synchronization test:');
 
 emb_dim=3;
@@ -85,27 +85,11 @@ k=4;
 w=20;
 states_eff_step=1;
 
-tic;[mi]=fastfc_mi(x,emb_dim,tau,k,w,states_eff_step);t_gs=toc;
+tic;[S,H,M,L]=fastfc_mi(x,emb_dim,tau,k,w,states_eff_step);t_gs=toc;
 
 disp(' Function ''fastfc_gs'' is working properly.');
 disp([' FastFC calculation of Generalized Synchronization indices: S, H, M, and L took: ' num2str(t_gs) ' seconds.']);
 disp(' ');
-
-%% Testing Generalized Synch.
-disp(' Starting Generalized Synchronization test:');
-
-emb_dim=3;
-tau=2;
-k=4;
-w=20;
-states_eff_step=1;
-
-tic;[gs]=fastfc_gs(x,emb_dim,tau,k,w,states_eff_step);t_gs=toc;
-
-disp(' Function ''fastfc_gs'' is working properly.');
-disp([' FastFC calculation of Generalized Synchronization indices: S, H, M, and L took: ' num2str(t_gs) ' seconds.']);
-disp(' ');
-
 
 %% Testing Strength
 disp(' Starting Strength test:');
@@ -157,14 +141,10 @@ disp(' Function ''fastfc_shortest_path_length_w'' is working properly.');
 disp([' FastFC calculation of Shortest Path Length index took: ' num2str(t_B) ' seconds.']);
 disp(' ');
 
-%% Acknoledgements
-disp(' ............ Fast FC is working rock solid. Thankyou')
+%% Final
+disp(' ............ Fast FC is working rock solid. Thanks! ..............')
 disp(' ');
 disp(' This file is part of Fast Functional Connectivity (FastFC)');
 disp(' Please consider helping by citing our work');
 disp(' http://juangpc.github.io/FastFC/');
 disp(' ');
-
-
-
-
