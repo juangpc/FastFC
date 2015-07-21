@@ -22,25 +22,20 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     b_d=(double*)mxGetPr(prhs[0]);    
     x_d=(double*)mxGetPr(prhs[1]);
     
-    b=(float*)mxMalloc(l_p*sizeof(float));
-    x=(float*)mxMalloc(l_p*sizeof(float));
+    b=(float*)malloc(l_p*sizeof(float));
+    x=(float*)malloc(l_p*sizeof(float));
     fft_x=(fftwf_complex*)fftwf_malloc(l_p*sizeof(fftwf_complex));
     fft_b=(fftwf_complex*)fftwf_malloc(l_p*sizeof(fftwf_complex));
     
-    if(mode==1)
-    {
-        p_r2c=fftwf_plan_dft_r2c_1d(l_p,b,fft_b,FFTW_ESTIMATE);
-        p_c2r=fftwf_plan_dft_c2r_1d(l_p,fft_b,b,FFTW_ESTIMATE);
-    }
-    else if(mode==2)
-    {
-        p_r2c=fftwf_plan_dft_r2c_1d(l_p,b,fft_b,FFTW_MEASURE);
-        p_c2r=fftwf_plan_dft_c2r_1d(l_p,fft_b,b,FFTW_MEASURE);
-    }                                           
-    else if(mode==3)
+    if(mode==2)
     {
         p_r2c=fftwf_plan_dft_r2c_1d(l_p,b,fft_b,FFTW_EXHAUSTIVE);
         p_c2r=fftwf_plan_dft_c2r_1d(l_p,fft_b,b,FFTW_EXHAUSTIVE);
+    }
+    else
+    {
+        p_r2c=fftwf_plan_dft_r2c_1d(l_p,b,fft_b,FFTW_ESTIMATE);
+        p_c2r=fftwf_plan_dft_c2r_1d(l_p,fft_b,b,FFTW_ESTIMATE);
     }                                           
 
     //copy b with normal padding
@@ -85,7 +80,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     fftwf_destroy_plan(p_r2c);
     fftwf_free(fft_b);    
     fftwf_free(fft_x);
-    mxFree(b);
-    mxFree(x);
+    free(b);
+    free(x);
 
 }
