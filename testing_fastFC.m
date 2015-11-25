@@ -164,6 +164,13 @@ disp(' Starting Clustering Coefficient test:');
 A=randn(n_sensors);
 A(1:n_sensors+1:end)=0;
 
+% [C]=fastfc_cluster_coef_wu(A)
+% 
+% Input parameters: 
+% A = adjacency matrix of nodes by nodes. Values between 0 and 1. Principal diagonal is zero. 
+% Output parameters:
+% C= column matrix where every value represents the Clustering Coefficient of each node. 
+
 tic;[C]=fastfc_cluster_coef_wu(A);t_C=toc;
 
 disp(' Function ''fastfc_cluster_coef_wu'' is working properly.');
@@ -177,6 +184,14 @@ A=randn(n_sensors);
 A(1:n_sensors+1:end)=0;
 W=(A.^-1);
 
+% [D,L]=fastfc_shortest_path_length_w(W)
+% 
+% Input parameters: 
+% W = directed or undirected weighted connection length matrix.Typically W is obtained by inverting each element in the Functional Connectivity matrix, transforming therefore between weights to length. 
+% Output parameters:
+% D = distance matrix between nodes (shortest weighted path).
+% L = number of edges in each shortest weighted path.
+
 tic;[D,L]=fastfc_shortest_path_length_w(W);t_L=toc;
 
 disp(' Function ''fastfc_shortest_path_length_w'' is working properly.');
@@ -189,6 +204,15 @@ disp(' Starting Betweenness Centrality test:');
 A=randn(n_sensors);
 A(1:n_sensors+1:end)=0;
 W=(A.^-1);
+
+% [D,L,BC]=fastfc_betweenness_cent_w(W)
+% 
+% Input parameters: 
+% 	W = directed or undirected connection-length matrix.
+% Output parameters:
+% D = distance matrix between nodes (shortest weighted path).
+% L = number of edges in each shortest weighted path.
+% BC = node Betweenness Centrality for each node in the network.
 
 tic;[D,L,B]=fastfc_betweenness_cent_w(W);t_B=toc;
 
