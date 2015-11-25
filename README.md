@@ -3,15 +3,15 @@ Fast Functional Connectivity Toolbox. This toolbox implements efficient C comput
 
 This is the main release branch of the repo. Please see other branches for accesing source code. 
 
+# Filtering tool
+- Zero-phase distorsion FIR filtering. 
+This filtering function has been built out of necessity.  It closely resembles Matlab's filtfilt built-in function implementation. It performs an N-dimensional circular padding (N=filter order). 
+
 # Functional Connectivity measures
 - Phase Synchronization measures: PLV, PLV's p-value, PLI, wPLI.
 - Mutual Information. (MILCA implementation)
 - Generalized Synchronization measures: S, H, M, L
 - Generalized Synchronization measrues (version 2. faster): S, H, M.
-
-# Filtering tool
-- Zero-phase distorsion FIR filtering. 
-This filtering function has been built out of necessity.  It closely resembles Matlab's filtfilt built-in function implementation. It performs an N-dimensional circular padding (N=filter order). 
 
 # Complex Networks measures
 - Strength for weighted undirected networks.
