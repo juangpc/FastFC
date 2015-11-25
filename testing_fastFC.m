@@ -47,6 +47,18 @@ disp(' ');
 disp(' Starting Zero Phase Distortion filtering test:')
 b=fir1(ceil(n_samples/5),[0.0160 0.0240],'bandpass',hamming(ceil(n_samples/5)+1),'scale');
 
+% y=fastfc_filt(filter,data,mode)
+% Input parameters:
+% filter = row vector with filter denominator coefficients.
+% data = column matrix with data to be filtered. Each sensor should be each column.
+% mode = mode for FFT scheduling
+% mode = 0 ,  execute fastest but suboptimal.
+% mode = 1 , execute fast but in a suboptimal algorithm.
+% mode = 2 , execute slower the first time, but consider possible faster algorithms.
+% mode = 3 , execute slowest the first time, but consider the fastest algorithm.
+% Output parameters:
+% y = array the same size of data, with each column corresponding to each filtered column of data.
+
 y_filtfilt=filtfilt(b,1,x);
 tic;y_filtfilt=filtfilt(b,1,x);t_filtfilt=toc;
 y_fastfc=fastfc_filt(b,x,1); %this first call takes longer for optimization purposes.
@@ -58,6 +70,21 @@ disp(' ');
 %% Testing Phase Synchronization function
 disp(' Starting Phase Synchronization test:');
 
+% [plv,pval_plv,pli,wpli]=fastfc_ps(data,samples_to_discard,mode)
+% 
+% Input parameters:
+% data = data (sensors by columns).
+% samples_to_discard = samples to discard at the beginning and samples to discard at the end of the phase signals. i.e. To discard 200 samples at the beginning and 200 samples at the end of each sensor, samples_to_discard should equal 200.
+%         mode = 0 -> execute fastest but suboptimal.
+%         mode = 1 -> execute fast but in a suboptimal algorithm.
+%         mode = 2 -> execute slower the first time, but consider possible faster algorithms.
+%         mode = 3 -> execute slowest the first time, but consider the fastest algorithm.
+% Output parameters:
+% plv = Phase Locking Value Functional Connectivity matrix.
+% pval_plv = pvalue for each index of the PLV matrix. 
+% pli = Phase Locking Index Functional Connectivity matrix.
+% wPli = weighted Phase Locking Functional Connectivity matrix.
+
 tic;[plv,pval_plv,pli,wpli]=fastfc_ps(x,n_samples*.1,1);t_ps=toc;
 
 disp(' Function ''fastfc_ps'' is working properly.');
@@ -67,6 +94,15 @@ disp(' ');
 %% Testing Mutual Info
 disp(' Starting Mutual Information test:');
 
+% [mi]=fastfc_mi(data,emb_dim,tau,k);
+% Input parameters:
+% data = eeg data (sensors by columns).
+% emb_dim = embedding dimensions to consider
+% tau = time lag to consider for embedding
+% k = number of neighbours to consider
+% Output parameters:
+% mi = Mutual Information Functional Connectivity matrix
+	
 emb_dim=3;
 tau=2;
 k=4;
@@ -78,6 +114,18 @@ disp(' ');
 
 %% Testing Generalized Synchronization
 disp(' Starting Generalized Synchronization test:');
+
+% [S,H,M,L]=fastfc_gs(data,emb_dim,tau,k,w,states_eff_step)
+% 
+% Input parameters:
+% data = eeg data (sensors by columns).
+% emb_dim = embedding dimension 
+% tau = time lag for embedding
+% k = number of neighbours to consider
+% w = window correction for neighbour finding
+% states_eff_step = state-space down sampling to consider when calculating distances 
+% Output parameters: 
+% S, H, M and L = Functional Connectivity matrices for each index.
 
 emb_dim=3;
 tau=2;
@@ -96,6 +144,13 @@ disp(' Starting Strength test:');
 
 A=randn(n_sensors);
 A(1:n_sensors+1:end)=0;
+
+% [S]=fastfc_strength_wu(A)
+% 
+% Input parameters: 
+% A = adjacency matrix of real values between 0 and 1, with zeroed principal diagonal elements.
+% Output parameters:
+% C = a row matrix where every value represents the Strength of each node. 
 
 tic;[S]=fastfc_strength_wu(A);t_S=toc;
 
