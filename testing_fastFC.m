@@ -133,7 +133,7 @@ k=4;
 w=20;
 states_eff_step=1;
 
-tic;[S,H,M,L]=fastfc_mi(x,emb_dim,tau,k,w,states_eff_step);t_gs=toc;
+tic;[S,H,M,L]=fastfc_gs(x,emb_dim,tau,k,w,states_eff_step);t_gs=toc;
 
 disp(' Function ''fastfc_gs'' is working properly.');
 disp([' FastFC calculation of Generalized Synchronization indices: S, H, M, and L took: ' num2str(t_gs) ' seconds.']);
