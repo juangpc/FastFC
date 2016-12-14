@@ -1,7 +1,10 @@
 # FastFC
 Fast Functional Connectivity Toolbox. This toolbox implements efficient C computing of different FC indices. It does so through C-MEX external interface appi and within Matlab's development environment.
 
-This is the main release branch of the repo. Please see other branches for accesing source code. 
+This is the main release branch of the repo. It only includes the final executable files and an example script. Please see other branches for accesing source code for each set of functions. 
+
+'Hope it helps!
+#
 
 # Filtering tool
 - Zero-phase distorsion FIR filtering. 
