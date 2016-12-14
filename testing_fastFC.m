@@ -21,6 +21,7 @@
 % 
 %    J. Garcia-Prieto, E. Pereda
 %
+%
 
 %% FastFC testing script
 
@@ -30,21 +31,14 @@ n_sensors=100;
 x=randn(n_samples,n_sensors); % remember columnwise matrix of each sensor.
 
 %% 
-disp(' '); 
-disp(' '); 
-disp(' FastFC testing script');
-disp(' ');
-disp(' ');
-disp(' This function is intended to check the correct installation of FastFC. ');
-disp(' While it helps understanding how different functions can be used. ');
-disp(' ');
-disp([' The testing setup will be a set of ' num2str(n_samples) ' samples and ' num2str(n_sensors) ' sensors.']);
-disp(' ..................................');
-
-disp(' ');
-% 
+fprintf('\n\n *** FastFC testing script *** \n\n\n');
+fprintf(' This function is intended to check the correct installation of FastFC.\n');
+fprintf(' While it helps understanding how different functions can be used.\n\n');
+fprintf([' The testing setup will be a set of ' num2str(n_samples) ' samples and ' num2str(n_sensors) ' sensors.\n']);
+fprintf(' IMPORTANT: sensors must be stored as columns in the input data.\n\n\n');
+ 
 %% testing FastFC filtering function
-disp(' Starting Zero Phase Distortion filtering test:')
+fprintf(' Starting Zero Phase Distortion filtering test:\n')
 b=fir1(ceil(n_samples/5),[0.0160 0.0240],'bandpass',hamming(ceil(n_samples/5)+1),'scale');
 
 % y=fastfc_filt(filter,data,mode)
@@ -63,12 +57,11 @@ y_filtfilt=filtfilt(b,1,x);
 tic;y_filtfilt=filtfilt(b,1,x);t_filtfilt=toc;
 y_fastfc=fastfc_filt(b,x,1); %this first call takes longer for optimization purposes.
 tic;y_fastfc=fastfc_filt(b,x,1);t_fastfc=toc;
-disp(' New filtfilt version called ''fastfc_filt'' is working properly.');
-disp([' FastFC is ' num2str(t_filtfilt/t_fastfc) ' times faster than Matlab''s filtfilt.']);
-disp(' ');
+fprintf(' New filtfilt version called ''fastfc_filt'' is working properly.\n');
+fprintf([' FastFC is ' num2str(t_filtfilt/t_fastfc) ' times faster than Matlab''s filtfilt.\n\n']);
 
 %% Testing Phase Synchronization function
-disp(' Starting Phase Synchronization test:');
+fprintf(' Starting Phase Synchronization test:\n');
 
 % [plv,pval_plv,pli,wpli]=fastfc_ps(data,samples_to_discard,mode)
 % 
@@ -85,14 +78,15 @@ disp(' Starting Phase Synchronization test:');
 % pli = Phase Locking Index Functional Connectivity matrix.
 % wPli = weighted Phase Locking Functional Connectivity matrix.
 
-tic;[plv,pval_plv,pli,wpli]=fastfc_ps(x,n_samples*.1,1);t_ps=toc;
+tic;[plv,pval_plv,pli1]=fastfc_ps(x,n_samples*.1,1);t_ps1=toc;
+tic;[pli2,wpli,imc]=fastfc_wpli(x);t_ps2=toc;
 
-disp(' Function ''fastfc_ps'' is working properly.');
-disp([' FastFC calculation of Phase Synch. indices: PLV, PLI and wPLI took: ' num2str(t_ps) ' seconds.']);
-disp(' ');
+fprintf(' Function ''fastfc_ps'' is working properly.\n');
+fprintf(' FastFC calculation of Phase Synch. indices: PLV and PLI took: %.03f seconds.\n',t_ps1);
+fprintf(' FastFC calculation of Phase Synch. indices: PLI, wPLI and ImC took: %.03f seconds.\n\n',t_ps2);
 
 %% Testing Mutual Info
-disp(' Starting Mutual Information test:');
+fprintf(' Starting Mutual Information test:\n');
 
 % [mi]=fastfc_mi(data,emb_dim,tau,k);
 % Input parameters:
@@ -108,12 +102,11 @@ tau=2;
 k=4;
 tic;[mi]=fastfc_mi(x,emb_dim,tau,k);t_mi=toc;
 
-disp(' Function ''fastfc_mi'' is working properly.');
-disp([' FastFC calculation of Mutual Information index took: ' num2str(t_mi) ' seconds.']);
-disp(' ');
+fprintf(' Function ''fastfc_mi'' is working properly.\n');
+fprintf(' FastFC calculation of Mutual Information index took: %.03f seconds.\n\n',t_mi);
 
 %% Testing Generalized Synchronization
-disp(' Starting Generalized Synchronization test:');
+fprintf(' Starting Generalized Synchronization test:\n');
 
 % [S,H,M,L]=fastfc_gs(data,emb_dim,tau,k,w,states_eff_step)
 % 
@@ -135,12 +128,11 @@ states_eff_step=1;
 
 tic;[S,H,M,L]=fastfc_gs(x,emb_dim,tau,k,w,states_eff_step);t_gs=toc;
 
-disp(' Function ''fastfc_gs'' is working properly.');
-disp([' FastFC calculation of Generalized Synchronization indices: S, H, M, and L took: ' num2str(t_gs) ' seconds.']);
-disp(' ');
+fprintf(' Function ''fastfc_gs'' is working properly.\n');
+fprintf(' FastFC calculation of Generalized Synchronization indices: S, H, M, and L took: %0.2f seconds.\n\n',t_gs);
 
 %% Testing Strength
-disp(' Starting Strength test:');
+fprintf(' Starting Strength test:\n');
 
 A=randn(n_sensors);
 A(1:n_sensors+1:end)=0;
@@ -152,14 +144,13 @@ A(1:n_sensors+1:end)=0;
 % Output parameters:
 % C = a row matrix where every value represents the Strength of each node. 
 
-tic;[S]=fastfc_strength_wu(A);t_S=toc;
+tic;[St]=fastfc_strength_wu(A);t_S=toc;
 
-disp(' Function ''fastfc_strength_wu'' is working properly.');
-disp([' FastFC calculation of Strength index took: ' num2str(t_S) ' seconds.']);
-disp(' ');
+fprintf(' Function ''fastfc_strength_wu'' is working properly.');
+fprintf(' FastFC calculation of Strength index took: %0.4f seconds.\n\n',t_S);
 
 %% Testing Clustering Coefficient
-disp(' Starting Clustering Coefficient test:');
+fprintf(' Starting Clustering Coefficient test:\n');
 
 A=randn(n_sensors);
 A(1:n_sensors+1:end)=0;
@@ -173,12 +164,11 @@ A(1:n_sensors+1:end)=0;
 
 tic;[C]=fastfc_cluster_coef_wu(A);t_C=toc;
 
-disp(' Function ''fastfc_cluster_coef_wu'' is working properly.');
-disp([' FastFC calculation of Clustering Coefficient index took: ' num2str(t_C) ' seconds.']);
-disp(' ');
+fprintf(' Function ''fastfc_cluster_coef_wu'' is working properly.\n');
+fprintf(' FastFC calculation of Clustering Coefficient index took: %0.4f seconds.\n\n',t_C);
 
 %% Testing Shortest Path Length
-disp(' Starting Shortest Path Lenght test:');
+fprintf(' Starting Shortest Path Lenght test:\n');
 
 A=randn(n_sensors);
 A(1:n_sensors+1:end)=0;
@@ -192,14 +182,13 @@ W=(A.^-1);
 % D = distance matrix between nodes (shortest weighted path).
 % L = number of edges in each shortest weighted path.
 
-tic;[D,L]=fastfc_shortest_path_length_w(W);t_L=toc;
+tic;[Dst,Ln]=fastfc_shortest_path_length_w(W);t_L=toc;
 
-disp(' Function ''fastfc_shortest_path_length_w'' is working properly.');
-disp([' FastFC calculation of Shortest Path Length index took: ' num2str(t_L) ' seconds.']);
-disp(' ');
+fprintf(' Function ''fastfc_shortest_path_length_w'' is working properly.\n');
+fprintf(' FastFC calculation of Shortest Path Length index took: %0.4f seconds.\n\n',t_L);
 
 %% Testing Betweenness Centrality
-disp(' Starting Betweenness Centrality test:');
+fprintf(' Starting Betweenness Centrality test:\n');
 
 A=randn(n_sensors);
 A(1:n_sensors+1:end)=0;
@@ -216,14 +205,11 @@ W=(A.^-1);
 
 tic;[D,L,B]=fastfc_betweenness_cent_w(W);t_B=toc;
 
-disp(' Function ''fastfc_shortest_path_length_w'' is working properly.');
-disp([' FastFC calculation of Shortest Path Length index took: ' num2str(t_B) ' seconds.']);
-disp(' ');
+fprintf(' Function ''fastfc_shortest_path_length_w'' is working properly.\n');
+fprintf(' FastFC calculation of Shortest Path Length index took: %0.4f seconds.\n\n',t_B);
 
 %% Final
-disp(' ............ Fast FC is working rock solid. Thanks! ..............')
-disp(' ');
-disp(' This file is part of Fast Functional Connectivity (FastFC)');
-disp(' Please consider helping by citing our work');
-disp(' http://juangpc.github.io/FastFC/');
-disp(' ');
+fprintf(' ............ Fast FC is working rock solid. Thanks! ..............\n\n')
+fprintf(' This file is part of Fast Functional Connectivity (FastFC)   --->  http://juangpc.github.io/FastFC\n');
+fprintf(' Please consider helping by citing our work\n\n\n');
+
