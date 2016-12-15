@@ -78,8 +78,8 @@ fprintf(' Starting Phase Synchronization test:\n');
 % pli = Phase Locking Index Functional Connectivity matrix.
 % wPli = weighted Phase Locking Functional Connectivity matrix.
 
-tic;[plv,pval_plv,pli1]=fastfc_ps(x,n_samples*.1,1);t_ps1=toc;
-tic;[pli2,wpli,imc]=fastfc_wpli(x);t_ps2=toc;
+tic;[plv,pval_plv,pli]=fastfc_ps(x,n_samples*.1,1);t_ps1=toc;
+tic;[wpli,imc]=fastfc_wpli(x);t_ps2=toc;
 
 fprintf(' Function ''fastfc_ps'' is working properly.\n');
 fprintf(' FastFC calculation of Phase Synch. indices: PLV and PLI took: %.03f seconds.\n',t_ps1);
