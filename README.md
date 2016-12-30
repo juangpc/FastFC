@@ -4,7 +4,7 @@ Fast Functional Connectivity Toolbox. This toolbox implements efficient C comput
 This is the main release branch of the repo. It only includes the final executable files, a needed dll and an example script. Please see other branches for accesing source code for each set of functions. 
 
 'Hope it helps!
-#
+
 # Installation
 The library has been implemented in standard C, although it uses OMP and FFTW (both open source projects). The only thing needed in order to use the functions is the FFTW dll which is included with the executables.
 
