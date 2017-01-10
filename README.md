@@ -1,6 +1,5 @@
 # FastFC
-Juan GPC - Ernesto Pereda (2017)
-juangpc (at) gmail.com 
+Juan GPC - Ernesto Pereda (2017) - juangpc (at) gmail.com 
 #
 Fast Functional Connectivity Toolbox. This toolbox implements efficient C computing of different FC indices. It does so through C-MEX external interface appi and within Matlab's development environment. The focus of FastFC is to be very small and easy to adapt to any existing toolbox within Matlab.
 
