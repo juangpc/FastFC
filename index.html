@@ -77,10 +77,11 @@ Output parameters:
 <h2>
 <a id="phase-synchronization" class="anchor" href="#phase-synchronization" aria-hidden="true"><span class="octicon octicon-link"></span></a>Phase Synchronization</h2>
 
-<p>PLV. PLI. wPLI are all computed (along with the estimated significance of the PLV) within the MEX function fastfc_ps directly invoked from the MATLAB environment.
+<p>PLV. PLI. wPLI and imCo are all computed (along with the estimated significance of the PLV) within the MEX function fastfc_ps and fastfc_wpli, directly invoked from the MATLAB environment.
 It is important to understand an additional input parameter of this function: samples_to_discard is the number of data samples to discard, to prevent edge effects during the estimation of the Hilbert Transform. The function uses an FFT-based algorithm to estimate the Hilbert Transform, after mirror padding the data, so that discarding of data should be used only for narrow signals where serious edge effects are suspected.</p>
 
-<p><strong>[plv,pval_plv,pli,wpli]=fastfc_ps(data,samples_to_discard,mode)</strong></p>
+<p><strong>[plv,pval_plv,pli]=fastfc_ps(data,samples_to_discard,mode)</strong></p>
+<p><strong>[wpli,imC]=fastfc_wpli(data)</strong></p>
 
 <p>Input parameters:</p>
 
@@ -95,7 +96,8 @@ Output parameters:
 *plv = Phase Locking Value Functional Connectivity matrix.
 *pval_plv = pvalue for each index of the PLV matrix. 
 *pli = Phase Locking Index Functional Connectivity matrix.
-*wPli = weighted Phase Locking Functional Connectivity matrix.</li>
+*wPli = Weighted Phase Locking Functional Connectivity matrix.
+*imC = Imaginary part of the Coherence Functional Connectivity matrix.</li>  
 </ul>
 
 <h2>
