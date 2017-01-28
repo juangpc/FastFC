@@ -26,10 +26,9 @@
 You can download the executable files (right now only available for Windows x64 systems) here. All functions are developed so that they can be called directly from Matlab's command line.</p>
 
 <h3>
-<a id="acknowledgements" class="anchor" href="#acknowledgements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Acknowledgements</h3>
+<a id="acknowledgements" class="anchor" href="#acknowledgements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Please do cite our work:</h3>
 
-<p>Please do cite our work: </p>
-“Efficient computation of functional brain networks: toward real-time functional connectivity”,
+<p>Efficient computation of functional brain networks: toward real-time functional connectivity</p>,
 Frontiers in Neuroinformatics, 2017, by Juan García-Prieto, Ricardo Bajo and Ernesto Pereda.
 <h3>
 <a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h3>
@@ -59,6 +58,9 @@ All functions in FastFC are directly accessible from the command line window of 
 
 <p>Both functions using FFTW subroutine library are the zero phase distortion filter and Phase Synchronization. They both have an input parameter called mode, which allows deciding how exhaustive the search for the optimal FFT algorithm should be. This is a FFTW feature which has been maintained through FastFC. Sometimes it is a good idea to spend a few seconds or even minutes searching for a good algorithm for FFT that can significantly improve performance of subsequent executions. Typically an initial search at the beginning of each MATLAB session can take a few minutes, ensuring an efficient execution which last much less time in every subsequent call to the function. However in general terms mode=1 is more convenient.</p>
 
+<h3>
+<a id="development" class="anchor" href="#development" aria-hidden="true"><span class="octicon octicon-link"></span></a>Development</h3>
+This repository has two branches. One only containing binary executables and "release", and a second one containing the binary executable files and a src/ folder with the source code of each function developed.Each function has been developed as a stand alone application. This was decided from the begining to make it easy to integrate this work in other projects.       
 <h2>
 <a id="zero-phase-distortion-filter" class="anchor" href="#zero-phase-distortion-filter" aria-hidden="true"><span class="octicon octicon-link"></span></a>Zero phase distortion filter</h2>
 
