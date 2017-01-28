@@ -60,6 +60,11 @@ All functions in FastFC are directly accessible from the command line window of 
 
 <p>Both functions using FFTW subroutine library are the zero phase distortion filter and Phase Synchronization. They both have an input parameter called mode, which allows deciding how exhaustive the search for the optimal FFT algorithm should be. This is a FFTW feature which has been maintained through FastFC. Sometimes it is a good idea to spend a few seconds or even minutes searching for a good algorithm for FFT that can significantly improve performance of subsequent executions. Typically an initial search at the beginning of each MATLAB session can take a few minutes, ensuring an efficient execution which last much less time in every subsequent call to the function. However in general terms mode=1 is more convenient.</p>
 
+<h3>
+<a id="development" class="anchor" href="#development" aria-hidden="true"><span class="octicon octicon-link"></span></a>Development</h3>
+There are two branches in the repository. One with binary executables exclusively, intended to be downloaded by users which are only interested in using the functions. A second branch, "dev" adds a src/ folder where all the code can be founded in C and C++. Also some object compiler files for debugging.
+
+
 <h2>
 <a id="zero-phase-distortion-filter" class="anchor" href="#zero-phase-distortion-filter" aria-hidden="true"><span class="octicon octicon-link"></span></a>Zero phase distortion filter</h2>
 
