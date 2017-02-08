@@ -15,4 +15,6 @@ Here you will find:
 - A binary version of this last program, compiled with Visual Studio for Matlab in Windows 64bit systems.
 - Some other tools and tries that have been generated while development. See log for more details.
 
-
+# Related research:
+Efficient computation of functional brain networks: towards real-time functional connectivity
+Frontiers in Neuroinformatics (2017) García-Prieto Juan, Bajo Ricardo, Pereda Ernesto
