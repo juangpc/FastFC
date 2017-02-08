@@ -9,3 +9,6 @@ All in a single file in order to help ports to other toolboxes. Matlab's MEX ext
 
 There is also a Phase Sync function version which implements FIR filtereing at the same time. However this version is not finished. There is aproblem with it and it blows matlab.
 
+# Related research:
+Efficient computation of functional brain networks: towards real-time functional connectivity
+Frontiers in Neuroinformatics (2017) García-Prieto Juan, Bajo Ricardo, Pereda Ernesto
