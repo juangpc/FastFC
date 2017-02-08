@@ -5,8 +5,10 @@ Fast Functional Connectivity Toolbox. This toolbox implements efficient C comput
 This is the development branch. It includes all the files writen during development of each index. Also object files for Visual Studio debugging and few other things. The C (all indices except MI) and C++ (for Mutual Information index) code can be found in the /src folder.
 
 'Hope it helps!
-#
-“Efficient computation of functional brain networks: towards real-time functional connectivity”, by Juan García-Prieto*, Ricardo Bajo and Ernesto Pereda, published in “Frontiers in Neuroinformatics” (2017). - Contact: juangpc (at) gmail.com 
+
+# Related research:
+Efficient computation of functional brain networks: towards real-time functional connectivity
+Frontiers in Neuroinformatics (2017) García-Prieto Juan, Bajo Ricardo, Pereda Ernesto
 
 # Installation
 The library has been implemented in standard C, although it uses OMP and FFTW (both open source projects). The only thing needed in order to use the functions is the FFTW dll which is included with the executables.
@@ -27,6 +29,5 @@ This filtering function has been built out of necessity.  It closely resembles M
 - Clustering Coefficient for weighted undirected networks.
 - Shortest path length for weighted networks (both directed and undirected).
 - Betweenness centrality for weighted networks (both directed and undirected). 
-
 
 
