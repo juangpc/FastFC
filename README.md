@@ -1,4 +1,5 @@
 # FastFC
+
 Fast Functional Connectivity Toolbox. This toolbox implements efficient C computing of different FC indices. It does so through C-MEX external interface appi and within Matlab's development environment. The focus of FastFC is to be very small and easy to adapt to any existing toolbox within Matlab.
 
 This is the main release branch of the repo. It only includes the final executable files, a needed dll and an example script. Please see other branches for accesing source code for each set of functions. 
@@ -8,7 +9,6 @@ This is the main release branch of the repo. It only includes the final executab
 # Related research:
 Efficient computation of functional brain networks: towards real-time functional connectivity
 Frontiers in Neuroinformatics (2017) García-Prieto Juan, Bajo Ricardo, Pereda Ernesto
-
 
 # Installation
 The library has been implemented in standard C, although it uses OMP and FFTW (both open source projects). The only thing needed in order to use the functions is the FFTW dll which is included with the executables.

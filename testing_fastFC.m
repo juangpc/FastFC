@@ -24,8 +24,6 @@
 %    ------------------------------------------
 %
 
-%
-
 %% FastFC testing script
 
 % configure number of sensors and samples
