@@ -5,6 +5,11 @@ This is the main release branch of the repo. It only includes the final executab
 
 'Hope it helps!
 
+# Related research:
+Efficient computation of functional brain networks: towards real-time functional connectivity
+Frontiers in Neuroinformatics (2017) García-Prieto Juan, Bajo Ricardo, Pereda Ernesto
+
+
 # Installation
 The library has been implemented in standard C, although it uses OMP and FFTW (both open source projects). The only thing needed in order to use the functions is the FFTW dll which is included with the executables.
 

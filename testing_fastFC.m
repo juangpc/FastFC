@@ -13,14 +13,17 @@
 %    You should have received a copy of the GNU General Public License
 %    along with FastFC.  If not, see <http://www.gnu.org/licenses/>.
 %
+%	 ------------------------------------------
+%    Please consider citing our work:
+%   
+%    Efficient computation of functional brain networks: towards real-time functional connectivity
+%	 Frontiers in Neuroinformatics (2017) García-Prieto Juan, Bajo Ricardo, Pereda Ernesto
+%
 %    ------------------------------------------ 
 %    Contact: Juan Garcia-Prieto    juangpc (at) gmail.com
 %    ------------------------------------------
 %
-%    Please consider helping by citing our research.
-% 
-%    J. Garcia-Prieto, E. Pereda
-%
+
 %
 
 %% FastFC testing script
