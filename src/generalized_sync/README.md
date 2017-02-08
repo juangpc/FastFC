@@ -9,3 +9,6 @@ S, H, M with a much faster and less memory demanding version (version2). It perf
 
 Maybe some other implementations will be added.
 
+# Related research:
+Efficient computation of functional brain networks: towards real-time functional connectivity
+Frontiers in Neuroinformatics (2017) García-Prieto Juan, Bajo Ricardo, Pereda Ernesto

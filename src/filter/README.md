@@ -9,3 +9,6 @@ All in a single file in order to help ports to other toolboxes. Matlab's MEX ext
 
 fastFC_filt function is developed after matlab's filtfilt function. It implements a two passes FIR filtering with previous circular padding of the original signal.
 
+# Related research:
+Efficient computation of functional brain networks: towards real-time functional connectivity
+Frontiers in Neuroinformatics (2017) García-Prieto Juan, Bajo Ricardo, Pereda Ernesto
