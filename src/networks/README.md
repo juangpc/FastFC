@@ -13,3 +13,6 @@ Be aware autolinks are forbidden. Thus, adjacency matrices' principal diagonal m
 ## Future Development
 - Shortest path length could perform much better if the inversion of the adj. matrix could be done by thread parallelization. At the same time double to float transformation could take place. And continue there as the program does now.
 
+# Related research:
+Efficient computation of functional brain networks: towards real-time functional connectivity
+Frontiers in Neuroinformatics (2017) García-Prieto Juan, Bajo Ricardo, Pereda Ernesto

@@ -16,15 +16,15 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 //
-// ------------------------------------------ 
-// Contact:
-// Juan Garcia-Prieto <juangpc@gmail.com>
-// ------------------------------------------
+//	 -------------------------------------------------------
+//   Please consider citing our work:
+//  
+//   Efficient computation of functional brain networks: towards real-time functional connectivity
+//	 Frontiers in Neuroinformatics (2017) García-Prieto Juan, Bajo Ricardo, Pereda Ernesto
 //
-// Please reference our research in your work.
-// 
-// J. Garcia-Prieto, E. Pereda
-// NAME OF PAPER
+//   -------------------------------------------------------
+//   Contact: Juan Garcia-Prieto    juangpc (at) gmail.com
+//   -------------------------------------------------------
 //
 // 
 
