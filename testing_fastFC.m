@@ -56,7 +56,9 @@ b=fir1(ceil(n_samples/5),[0.0160 0.0240],'bandpass',hamming(ceil(n_samples/5)+1)
 % y = array the same size of data, with each column corresponding to each filtered column of data.
 
 y_filtfilt=filtfilt(b,1,x);
-tic;y_filtfilt=filtfilt(b,1,x);t_filtfilt=toc;
+tic;
+y_filtfilt=filtfilt(b,1,x);
+t_filtfilt=toc;
 y_fastfc=fastfc_filt(b,x,1); %this first call takes longer for optimization purposes.
 tic;y_fastfc=fastfc_filt(b,x,1);t_fastfc=toc;
 fprintf(' New filtfilt version called ''fastfc_filt'' is working properly.\n');
